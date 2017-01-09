@@ -53,10 +53,10 @@ function labeling_OpeningFcn(hObject, eventdata, handles, varargin)
 global img_file_path
 global labels
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% DEV OPTION - DELETE!!!!     %
-img_file_path = './lena.jpg'; %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % DEV OPTION - COMMENT!!!!    %
+% img_file_path = './lena.jpg'; %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Choose default command line output for labeling
 handles.output = hObject;
@@ -81,7 +81,9 @@ set(imageHandle,'ButtonDownFcn',@ImageClickCallback);
 % Update handles structure
 guidata(hObject, handles);
 
+% --- Executes when the image is clicked.
 function ImageClickCallback ( objectHandle , eventData )
+% This function opens a sub-window to select the type of parasite in the picture
 global px_coordinates
 
 axesHandle  = get(objectHandle,'Parent');
@@ -91,7 +93,6 @@ coordinates = get(axesHandle,'CurrentPoint');
 px_coordinates = floor(coordinates(1,1:2));
 
 uiwait(label_select)
-
 
 % --- Outputs from this function are returned to the command line.
 function varargout = labeling_OutputFcn(hObject, eventdata, handles)
@@ -103,98 +104,14 @@ function varargout = labeling_OutputFcn(hObject, eventdata, handles)
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 
-% --- Executes on button press in pushbutton1.
-function pushbutton1_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-axes(handles.axes1);
-cla;
-
-popup_sel_index = get(handles.popupmenu1, 'Value');
-switch popup_sel_index
-    case 1
-        plot(rand(5));
-    case 2
-        plot(sin(1:0.01:25.99));
-    case 3
-        bar(1:.5:10);
-    case 4
-        plot(membrane);
-    case 5
-        surf(peaks);
-end
-
-
-% --------------------------------------------------------------------
-function FileMenu_Callback(hObject, eventdata, handles)
-% hObject    handle to FileMenu (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function OpenMenuItem_Callback(hObject, eventdata, handles)
-% hObject    handle to OpenMenuItem (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-file = uigetfile('*.fig');
-if ~isequal(file, 0)
-    open(file);
-end
-
-% --------------------------------------------------------------------
-function PrintMenuItem_Callback(hObject, eventdata, handles)
-% hObject    handle to PrintMenuItem (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-printdlg(handles.figure1)
-
-% --------------------------------------------------------------------
-function CloseMenuItem_Callback(hObject, eventdata, handles)
-% hObject    handle to CloseMenuItem (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-selection = questdlg(['Close ' get(handles.figure1,'Name') '?'],...
-    ['Close ' get(handles.figure1,'Name') '...'],...
-    'Yes','No','Yes');
-if strcmp(selection,'No')
-    return;
-end
-
-delete(handles.figure1)
-
-
-% --- Executes on selection change in popupmenu1.
-function popupmenu1_Callback(hObject, eventdata, handles)
-% hObject    handle to popupmenu1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = get(hObject,'String') returns popupmenu1 contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupmenu1
-
-
-% --- Executes during object creation, after setting all properties.
-function popupmenu1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupmenu1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-set(hObject, 'String', {'plot(rand(5))', 'plot(sin(1:0.01:25))', 'bar(1:.5:10)', 'plot(membrane)', 'surf(peaks)'});
-
-
 % --- Executes on button press in toggle_size.
 function toggle_size_Callback(hObject, eventdata, handles)
 % hObject    handle to toggle_size (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+% TODO: Fix -> When the image has been clicked, it does not restore or maximize
+% properly
 
 if isequal(get(get(hObject, 'Parent'), 'outerposition'), [0 0 1 1])
     % The window is maximized -> unmaximize
@@ -216,17 +133,8 @@ function figure1_CloseRequestFcn(hObject, eventdata, handles)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DEV OPTION - UNCOMMENT!!!! %
 % Open main menu figure      %
-% main                       %
+main                         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Hint: delete(hObject) closes the figure
 delete(hObject);
-
-
-% --- Executes on button press in save_labels.
-function save_labels_Callback(hObject, eventdata, handles)
-% hObject    handle to save_labels (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% TODO: Save labels matrix to file

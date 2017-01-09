@@ -52,12 +52,13 @@ function label_select_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to label_select (see VARARGIN)
 
+% Get current pointer location
 pointer_pos(1,1:2)=get(0,'Pointerlocation');
 
 % Choose default command line output for label_select
 handles.output = hObject;
 
-% Position the window at the coordinates
+% Position the window at the current pointer's coordinates
 set(hObject, 'Units', 'Pixels');
 outer_position = get(hObject, 'OuterPosition');
 
@@ -115,7 +116,7 @@ global labels
 global img_file_path
 
 % Save label as the pop-up menu value
-if get(handles.parasite_types, 'Value') < 5
+if get(handles.parasite_types, 'Value') < length(get(handles.parasite_types, 'String'))
     % Parasite type selected
     labels(px_coordinates(1), px_coordinates(2)) = get(handles.parasite_types, 'Value');
 end
@@ -139,4 +140,6 @@ function cancel_button_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+% Return to previous window
+uiresume
 delete(get(hObject, 'Parent'));
