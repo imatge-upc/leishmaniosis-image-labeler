@@ -22,7 +22,7 @@ function varargout = labeling(varargin)
 
 % Edit the above text to modify the response to help labeling
 
-% Last Modified by GUIDE v2.5 08-Jan-2017 20:50:53
+% Last Modified by GUIDE v2.5 22-Jan-2017 19:57:42
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -110,16 +110,22 @@ function toggle_size_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% TODO: Fix -> When the image has been clicked, it does not restore or maximize
-% properly
-
 if isequal(get(get(hObject, 'Parent'), 'outerposition'), [0 0 1 1])
     % The window is maximized -> unmaximize
     set(get(hObject, 'Parent'),'Units', 'normalized', 'outerposition', handles.original_size);
+    
+    set(handles.axes1, 'Units', 'normalized', ...
+        'outerposition', [-0.0986   -0.0234    1.1546    1.0061]);
+    
     set(hObject, 'String', 'Maximize');
 else
     % The window is not maximize -> maximize
-    set(get(hObject, 'Parent'),'Units', 'normalized', 'outerposition',[0 0 1 1]);
+    set(get(hObject, 'Parent'), 'Units', 'normalized', ...
+        'outerposition',[0 0 1 1]);
+    
+    set(handles.axes1, 'Units', 'normalized', ...
+        'outerposition', [-0.0986   -0.0234    1.1546    1.0061]);
+    
     set(hObject, 'String', 'Restore');
 end
 
