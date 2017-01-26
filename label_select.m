@@ -22,7 +22,7 @@ function varargout = label_select(varargin)
 
 % Edit the above text to modify the response to help label_select
 
-% Last Modified by GUIDE v2.5 08-Jan-2017 20:12:54
+% Last Modified by GUIDE v2.5 25-Jan-2017 20:12:00
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -68,9 +68,6 @@ set(hObject, 'OuterPosition', selector_position);
 % Update handles structure
 guidata(hObject, handles);
 
-% UIWAIT makes label_select wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
-
 
 % --- Outputs from this function are returned to the command line.
 function varargout = label_select_OutputFcn(hObject, eventdata, handles) 
@@ -88,7 +85,6 @@ function parasite_types_Callback(hObject, eventdata, handles)
 % hObject    handle to parasite_types (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
 % Hints: contents = cellstr(get(hObject,'String')) returns parasite_types contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from parasite_types
 
@@ -111,23 +107,22 @@ function ok_button_Callback(hObject, eventdata, handles)
 % hObject    handle to ok_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global px_coordinates
+
 global labels
-global img_file_path
+global rect_data
 
 % Save label as the pop-up menu value
 if get(handles.parasite_types, 'Value') < length(get(handles.parasite_types, 'String'))
-    % Parasite type selected
-    labels(px_coordinates(1), px_coordinates(2)) = get(handles.parasite_types, 'Value');
+    % Parasite type selected -> add data to labels cell array
+    labels{length(labels) + 1} = struct(...
+        'x', rect_data(1), ...
+        'y', rect_data(2), ...
+        'width', rect_data(3), ...
+        'height', rect_data(4), ...
+        'parasite_type', get(handles.parasite_types, 'Value'), ...
+        'comments', get(handles.comments_textbox, 'String') ...
+    );
 end
-
-% Get image path without extension
-pattern = '.jpg';
-replacement = '';
-img_name = regexprep(img_file_path,pattern,replacement);
-
-% TODO Save labels to file
-dlmwrite([img_name,'_labels.csv'],labels);
 
 % Return to previous window
 uiresume
@@ -143,3 +138,23 @@ function cancel_button_Callback(hObject, eventdata, handles)
 % Return to previous window
 uiresume
 delete(get(hObject, 'Parent'));
+
+
+function comments_textbox_Callback(hObject, eventdata, handles)
+% hObject    handle to comments_textbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% Hints: get(hObject,'String') returns contents of comments_textbox as text
+%        str2double(get(hObject,'String')) returns contents of comments_textbox as a double
+
+% --- Executes during object creation, after setting all properties.
+function comments_textbox_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to comments_textbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

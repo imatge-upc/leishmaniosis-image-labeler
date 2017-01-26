@@ -62,9 +62,6 @@ handles.output = hObject;
 % Update handles structure
 guidata(hObject, handles);
 
-% UIWAIT makes main wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
-
 
 % --- Outputs from this function are returned to the command line.
 function varargout = main_OutputFcn(hObject, eventdata, handles)
@@ -138,6 +135,7 @@ set(handles.img_path,'String', displayString);
 % Update handles structure
 guidata(hObject, handles);
 
+
 function img_path_Callback(hObject, eventdata, handles)
 % hObject    handle to img_path (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -170,12 +168,12 @@ function openimage_Callback(hObject, eventdata, handles)
 % hObject    handle to openimage (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% Open labeling applet figure
-% varargout = labeling(figure(labeling));
+
 global img_file_path
 
 % Detect if an image has been selected
 if ~strcmp(img_file_path, '')
+    % Open labeling applet figure
     labeling
     
     % Close this figure

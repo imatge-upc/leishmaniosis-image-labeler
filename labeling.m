@@ -22,7 +22,7 @@ function varargout = labeling(varargin)
 
 % Edit the above text to modify the response to help labeling
 
-% Last Modified by GUIDE v2.5 22-Jan-2017 19:57:42
+% Last Modified by GUIDE v2.5 25-Jan-2017 19:02:29
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -43,6 +43,7 @@ else
 end
 % End initialization code - DO NOT EDIT
 
+
 % --- Executes just before labeling is made visible.
 function labeling_OpeningFcn(hObject, eventdata, handles, varargin)
 % This function has no output args, see OutputFcn.
@@ -53,10 +54,13 @@ function labeling_OpeningFcn(hObject, eventdata, handles, varargin)
 global img_file_path
 global labels
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % DEV OPTION - COMMENT!!!!    %
-% img_file_path = './lena.jpg'; %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Initialize labels as an empty cell array
+labels = cell(0);
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % DEV OPTION - COMMENT WHEN FINISHED!!!!    %
+% img_file_path = './lena.jpg';               %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Choose default command line output for labeling
 handles.output = hObject;
@@ -68,20 +72,15 @@ set(hObject, 'Name', [img_file_path, ' - TSC Leishmaniosis Labeling App']);
 set(hObject,'Units', 'normalized');
 handles.original_size = get(hObject, 'outerposition');
 
-% Plot the selected image in 'main.m'
+% Plot the selected image
 image = imread(img_file_path);
-im_size = size(image);
-
-% Initialize empty label matrix
-labels = zeros(im_size(1:2), 'uint8');
-
 imageHandle = imshow(image);
-set(imageHandle,'ButtonDownFcn',@ImageClickCallback);
 
 % Update handles structure
 guidata(hObject, handles);
 
-% --- Executes when the image is clicked.
+
+% --- Executes when the rectangle is double-clicked.
 function ImageClickCallback ( objectHandle , eventData )
 % This function opens a sub-window to select the type of parasite in the picture
 global px_coordinates
@@ -94,6 +93,7 @@ px_coordinates = floor(coordinates(1,1:2));
 
 uiwait(label_select)
 
+
 % --- Outputs from this function are returned to the command line.
 function varargout = labeling_OutputFcn(hObject, eventdata, handles)
 % varargout  cell array for returning output args (see VARARGOUT);
@@ -103,6 +103,7 @@ function varargout = labeling_OutputFcn(hObject, eventdata, handles)
 
 % Get default command line output from handles structure
 varargout{1} = handles.output;
+
 
 % --- Executes on button press in toggle_size.
 function toggle_size_Callback(hObject, eventdata, handles)
@@ -136,11 +137,60 @@ function figure1_CloseRequestFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% DEV OPTION - UNCOMMENT!!!! %
-% Open main menu figure      %
-main                         %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DEV OPTION - UNCOMMENT WHEN FINISHED!!!! %
+% Open main menu figure                    %
+main                                       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Hint: delete(hObject) closes the figure
 delete(hObject);
+
+
+% --- Executes on button press in toggle_tagging.
+function toggle_tagging_Callback(hObject, eventdata, handles)
+% hObject    handle to toggle_tagging (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of toggle_tagging
+
+global rect_data
+
+while get(hObject,'Value')
+    % TODO Check that this is correct
+    set(hObject, 'Interruptible', 'Off')
+    
+    rect = imrect;
+    
+    rect_data = wait(rect);
+    
+    % Launch label_select
+    ImageClickCallback(handles.axes1)
+    
+    if ~isempty(rect_data)
+        rectangle('Position', rect_data, 'LineWidth',2, 'EdgeColor','g');
+    end
+    
+    % TODO Check that this is correct
+    set(hObject, 'Interruptible', 'On')
+end
+
+
+% --- Executes on button press in save_button.
+function save_button_Callback(hObject, eventdata, handles)
+% hObject    handle to save_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+global labels
+global img_file_path
+
+% Get image path without extension
+pattern = '.jpg';
+replacement = '';
+img_name = regexprep(img_file_path,pattern,replacement);
+
+% TODO Try saving in UBJSON format
+% Save labels to JSON file
+savejson('', labels, 'FileName', [img_name,'_labels.json'], 'Compact', 1);
