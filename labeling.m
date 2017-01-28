@@ -41,6 +41,8 @@ if nargout
 else
     gui_mainfcn(gui_State, varargin{:});
 end
+
+end
 % End initialization code - DO NOT EDIT
 
 
@@ -79,6 +81,8 @@ imageHandle = imshow(image);
 % Update handles structure
 guidata(hObject, handles);
 
+end
+
 
 % --- Executes when the rectangle is double-clicked.
 function ImageClickCallback ( objectHandle , eventData )
@@ -93,6 +97,8 @@ px_coordinates = floor(coordinates(1,1:2));
 
 uiwait(label_select)
 
+end
+
 
 % --- Outputs from this function are returned to the command line.
 function varargout = labeling_OutputFcn(hObject, eventdata, handles)
@@ -103,6 +109,8 @@ function varargout = labeling_OutputFcn(hObject, eventdata, handles)
 
 % Get default command line output from handles structure
 varargout{1} = handles.output;
+
+end
 
 
 % --- Executes on button press in toggle_size.
@@ -130,6 +138,8 @@ else
     set(hObject, 'String', 'Restore');
 end
 
+end
+
 
 % --- Executes when user attempts to close figure1.
 function figure1_CloseRequestFcn(hObject, eventdata, handles)
@@ -145,6 +155,8 @@ main                                       %
 
 % Hint: delete(hObject) closes the figure
 delete(hObject);
+
+end
 
 
 % --- Executes on button press in toggle_tagging.
@@ -176,6 +188,8 @@ while get(hObject,'Value')
     set(hObject, 'Interruptible', 'On')
 end
 
+end
+
 
 % --- Executes on button press in save_button.
 function save_button_Callback(hObject, eventdata, handles)
@@ -194,3 +208,5 @@ img_name = regexprep(img_file_path,pattern,replacement);
 % TODO Try saving in UBJSON format
 % Save labels to JSON file
 savejson('', labels, 'FileName', [img_name,'_labels.json'], 'Compact', 1);
+
+end
