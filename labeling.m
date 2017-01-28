@@ -55,14 +55,18 @@ function labeling_OpeningFcn(hObject, eventdata, handles, varargin)
 % varargin   command line arguments to labeling (see VARARGIN)
 global img_file_path
 global labels
+global rectangles
 
 % Initialize labels as an empty cell array
 labels = cell(0);
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % DEV OPTION - COMMENT WHEN FINISHED!!!!    %
-% img_file_path = './lena.jpg';               %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Initialize rectangles as an empty cell array
+rectangles = cell(0);
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % DEV OPTION - COMMENT WHEN FINISHED!!!!         %
+% img_file_path = './data/BCN877_72h_x20bf_3.jpg'; %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Choose default command line output for labeling
 handles.output = hObject;
@@ -169,25 +173,62 @@ function toggle_tagging_Callback(hObject, eventdata, handles)
 % Hint: get(hObject,'Value') returns toggle state of toggle_tagging
 
 global rect_data
+global rectangles
+
+fcn = makeConstrainToRectFcn( ...
+    'imrect', ...
+    handles.axes1.XLim, ...
+    handles.axes1.YLim ...
+    );
 
 while get(hObject,'Value')
     % TODO Check that this is correct
     set(hObject, 'Interruptible', 'Off')
     
-    rect = imrect;
+    l = size(rectangles,1) + 1;
+    rectangles{l, 1} = imrect;
     
-    rect_data = wait(rect);
+    setPositionConstraintFcn(rectangles{end,1},fcn);
+    
+    rect_data = wait(rectangles{end,1});
     
     % Launch label_select
     ImageClickCallback(handles.axes1)
     
     if ~isempty(rect_data)
-        rectangle('Position', rect_data, 'LineWidth',2, 'EdgeColor','g');
+        % Add color rectangle on top of the drawn one
+        rectangles{l, 2} = rectangle(...
+            'Position', rect_data, ...
+            'LineWidth',2, ...
+            'EdgeColor','g'...
+            );
+        
+        % Callback for updating rectangle info when it is moved
+        addNewPositionCallback(rectangles{end, 1},...
+            (@(p) rectanglePositionCallback(p,l)) ...
+            );
     end
     
     % TODO Check that this is correct
     set(hObject, 'Interruptible', 'On')
 end
+
+end
+
+% --- Executes on when the user moves a rectangle.
+function rectanglePositionCallback(rect_data, l)
+
+global labels
+global rectangles
+
+% Update position of the color rectangle
+set(rectangles{l,2}, 'Position', rect_data)
+
+% Update rectangle position in labels cell array
+labels{l}.x = rect_data(1);
+labels{l}.y = rect_data(2);
+labels{l}.width = rect_data(3);
+labels{l}.height = rect_data(4);
 
 end
 
