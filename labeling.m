@@ -118,6 +118,7 @@ function toggle_size_Callback(hObject, eventdata, handles)
 % hObject    handle to toggle_size (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+set(get(hObject, 'Parent'),'Units', 'normalized')
 
 if isequal(get(get(hObject, 'Parent'), 'outerposition'), [0 0 1 1])
     % The window is maximized -> unmaximize
