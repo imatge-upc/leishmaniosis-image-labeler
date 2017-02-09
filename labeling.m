@@ -22,7 +22,7 @@ function varargout = labeling(varargin)
 
 % Edit the above text to modify the response to help labeling
 
-% Last Modified by GUIDE v2.5 25-Jan-2017 19:02:29
+% Last Modified by GUIDE v2.5 09-Feb-2017 10:48:54
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -55,13 +55,18 @@ function labeling_OpeningFcn(hObject, eventdata, handles, varargin)
 % varargin   command line arguments to labeling (see VARARGIN)
 global img_file_path
 global labels
-global rectangles
+global regions
+global rect_on
+global poly_on
+
+rect_on = 0;
+poly_on = 0;
 
 % Initialize labels as an empty cell array
 labels = cell(0);
 
-% Initialize rectangles as an empty cell array
-rectangles = cell(0);
+% Initialize regions as an empty cell array
+regions = cell(0);
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % % DEV OPTION - COMMENT WHEN FINISHED!!!!         %
@@ -164,16 +169,21 @@ delete(hObject);
 end
 
 
-% --- Executes on button press in toggle_tagging.
-function toggle_tagging_Callback(hObject, eventdata, handles)
-% hObject    handle to toggle_tagging (see GCBO)
+% --- Executes on button press in toggle_rectangle.
+function toggle_rectangle_Callback(hObject, eventdata, handles)
+% hObject    handle to toggle_rectangle (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of toggle_tagging
+% Hint: get(hObject,'Value') returns toggle state of toggle_rectangle
 
 global rect_data
-global rectangles
+global regions
+global rect_on
+global poly_on
+
+rect_on = 1;
+poly_on = 0;
 
 fcn = makeConstrainToRectFcn( ...
     'imrect', ...
@@ -185,26 +195,26 @@ while get(hObject,'Value')
     % TODO Check that this is correct
     set(hObject, 'Interruptible', 'Off')
     
-    l = size(rectangles,1) + 1;
-    rectangles{l, 1} = imrect;
+    l = size(regions,1) + 1;
+    regions{l, 1} = imrect;
     
-    setPositionConstraintFcn(rectangles{end,1},fcn);
+    setPositionConstraintFcn(regions{end,1},fcn);
     
-    rect_data = wait(rectangles{end,1});
+    rect_data = wait(regions{end,1});
     
     % Launch label_select
     ImageClickCallback(handles.axes1)
     
     if ~isempty(rect_data)
         % Add color rectangle on top of the drawn one
-        rectangles{l, 2} = rectangle(...
+        regions{l, 2} = rectangle(...
             'Position', rect_data, ...
             'LineWidth',2, ...
             'EdgeColor','g'...
             );
         
         % Callback for updating rectangle info when it is moved
-        addNewPositionCallback(rectangles{end, 1},...
+        addNewPositionCallback(regions{end, 1},...
             (@(p) rectanglePositionCallback(p,l)) ...
             );
     end
@@ -219,10 +229,10 @@ end
 function rectanglePositionCallback(rect_data, l)
 
 global labels
-global rectangles
+global regions
 
 % Update position of the color rectangle
-set(rectangles{l,2}, 'Position', rect_data)
+set(regions{l,2}, 'Position', rect_data)
 
 % Update rectangle position in labels cell array
 labels{l}.x = rect_data(1);
@@ -249,6 +259,74 @@ img_name = regexprep(img_file_path,pattern,replacement);
 
 % TODO Try saving in UBJSON format
 % Save labels to JSON file
-savejson('', labels, 'FileName', [img_name,'_labels.json'], 'Compact', 1);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DEV - Activate compact when finished!!                                   %
+savejson('', labels, 'FileName', [img_name,'_labels.json'], 'Compact', 1); %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+end
+
+
+% --- Executes on button press in toggle_polygon.
+function toggle_polygon_Callback(hObject, eventdata, handles)
+% hObject    handle to toggle_polygon (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of toggle_polygon
+
+global rect_data
+global regions
+global rect_on
+global poly_on
+
+rect_on = 0;
+poly_on = 1;
+
+fcn = makeConstrainToRectFcn( ...
+    'impoly', ...
+    handles.axes1.XLim, ...
+    handles.axes1.YLim ...
+    );
+
+while get(hObject,'Value')
+    % TODO Check that this is correct
+    set(hObject, 'Interruptible', 'Off')
+    
+    l = size(regions,1) + 1;
+    regions{l, 1} = impoly('Closed',true);
+    
+    api = iptgetapi(regions{end,1});
+    api.setPositionConstraintFcn(fcn);
+    
+    rect_data = wait(regions{end,1});
+    
+    % Launch label_select
+    ImageClickCallback(handles.axes1)
+    
+    if ~isempty(rect_data)
+        % Set polygon colour
+        api.setColor('green');
+        
+        % Callback for updating region info when it is moved
+        addNewPositionCallback(regions{end, 1},...
+            (@(p) polygonPositionCallback(p,l)) ...
+            );
+    end
+    
+    % TODO Check that this is correct
+    set(hObject, 'Interruptible', 'On')
+end
+
+end
+
+% --- Executes on when the user moves a polygon.
+function polygonPositionCallback(rect_data, l)
+
+global labels
+
+% Update region position in labels cell array
+labels{l}.Position = rect_data;
 
 end

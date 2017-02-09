@@ -1,3 +1,7 @@
+# Ignore labels JSON files
+*.json
+ideas.yaml
+
 ### Windows template
 # Windows image file caches
 
