@@ -22,7 +22,7 @@ function varargout = labeling(varargin)
 
 % Edit the above text to modify the response to help labeling
 
-% Last Modified by GUIDE v2.5 09-Feb-2017 10:48:54
+% Last Modified by GUIDE v2.5 16-Feb-2017 12:04:50
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -68,10 +68,10 @@ labels = cell(0);
 % Initialize regions as an empty cell array
 regions = cell(0);
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % DEV OPTION - COMMENT WHEN FINISHED!!!!         %
-% img_file_path = './data/BCN877_72h_x20bf_3.jpg'; %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DEV OPTION - COMMENT WHEN FINISHED!!!!         %
+img_file_path = './data/BCN877_72h_x20bf_3.jpg'; %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Choose default command line output for labeling
 handles.output = hObject;
@@ -157,11 +157,11 @@ function figure1_CloseRequestFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% DEV OPTION - UNCOMMENT WHEN FINISHED!!!! %
-% Open main menu figure                    %
-main                                       %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % DEV OPTION - UNCOMMENT WHEN FINISHED!!!! %
+% % Open main menu figure                    %
+% % main                                       %
+% % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Hint: delete(hObject) closes the figure
 delete(hObject);
@@ -262,7 +262,7 @@ img_name = regexprep(img_file_path,pattern,replacement);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DEV - Activate compact when finished!!                                   %
-savejson('', labels, 'FileName', [img_name,'_labels.json'], 'Compact', 1); %
+savejson('', labels, 'FileName', [img_name,'_labels.json'], 'Compact', 0); %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 end
@@ -328,5 +328,36 @@ global labels
 
 % Update region position in labels cell array
 labels{l}.Position = rect_data;
+
+end
+
+
+% --- Executes on button press in set_square.
+function set_square_Callback(hObject, eventdata, handles)
+% hObject    handle to set_square (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% global rect_data
+global regions
+global rect_on
+
+% Check that rectangles are being selected and there is at least one selected
+try
+    assert(rect_on == 1,...
+        'MATLAB:Rect:Unselected',...
+        'This option is only available for rectangle regions')
+    assert(size(regions,1) >= 1,...
+        'MATLAB:Rect:No_rectangles', 'There are no rectangles to set square')
+    
+catch MException
+    helpdlg(MException.message,MException.identifier)
+end
+
+position = getPosition(regions{end,1});
+
+max_dim = max(position(3:4));
+
+setPosition(regions{end,1}, [position(1:2),max_dim, max_dim])
 
 end
