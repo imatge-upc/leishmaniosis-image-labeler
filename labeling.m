@@ -22,7 +22,7 @@ function varargout = labeling(varargin)
 
 % Edit the above text to modify the response to help labeling
 
-% Last Modified by GUIDE v2.5 16-Feb-2017 12:04:50
+% Last Modified by GUIDE v2.5 16-Feb-2017 20:04:21
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -175,7 +175,7 @@ function toggle_rectangle_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of toggle_rectangle
 
-global rect_data
+global region_data
 global regions
 global active_region_type
 
@@ -196,15 +196,15 @@ while get(hObject,'Value')
     
     setPositionConstraintFcn(regions{end,1},fcn);
     
-    rect_data = wait(regions{end,1});
+    region_data = wait(regions{end,1});
     
     % Launch label_select
     ImageClickCallback(handles.axes1)
     
-    if ~isempty(rect_data)
+    if ~isempty(region_data)
         % Add color rectangle on top of the drawn one
         regions{l, 2} = rectangle(...
-            'Position', rect_data, ...
+            'Position', region_data, ...
             'LineWidth',2, ...
             'EdgeColor','g'...
             );
@@ -222,19 +222,19 @@ end
 end
 
 % --- Executes on when the user moves a rectangle.
-function rectanglePositionCallback(rect_data, l)
+function rectanglePositionCallback(region_data, l)
 
 global labels
 global regions
 
 % Update position of the color rectangle
-set(regions{l,2}, 'Position', rect_data)
+set(regions{l,2}, 'Position', region_data)
 
 % Update rectangle position in labels cell array
-labels{l}.x = rect_data(1);
-labels{l}.y = rect_data(2);
-labels{l}.width = rect_data(3);
-labels{l}.height = rect_data(4);
+labels{l}.x = region_data(1);
+labels{l}.y = region_data(2);
+labels{l}.width = region_data(3);
+labels{l}.height = region_data(4);
 
 end
 
@@ -273,7 +273,7 @@ function toggle_polygon_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of toggle_polygon
 
-global rect_data
+global region_data
 global regions
 global active_region_type
 
@@ -295,12 +295,12 @@ while get(hObject,'Value')
     api = iptgetapi(regions{end,1});
     api.setPositionConstraintFcn(fcn);
     
-    rect_data = wait(regions{end,1});
+    region_data = wait(regions{end,1});
     
     % Launch label_select
     ImageClickCallback(handles.axes1)
     
-    if ~isempty(rect_data)
+    if ~isempty(region_data)
         % Set polygon colour
         api.setColor('green');
         
@@ -317,12 +317,12 @@ end
 end
 
 % --- Executes on when the user moves a polygon.
-function polygonPositionCallback(rect_data, l)
+function polygonPositionCallback(region_data, l)
 
 global labels
 
 % Update region position in labels cell array
-labels{l}.Position = rect_data;
+labels{l}.Position = region_data;
 
 end
 
@@ -333,7 +333,6 @@ function set_square_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% global rect_data
 global regions
 global active_region_type
 
@@ -353,6 +352,58 @@ try
 
 catch MException
     helpdlg(MException.message,MException.identifier)
+end
+
+end
+
+
+% --- Executes on button press in freehand_region.
+function freehand_region_Callback(hObject, eventdata, handles)
+% hObject    handle to freehand_region (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of freehand_region
+
+global region_data
+global regions
+global active_region_type
+
+active_region_type = 'freehand';
+
+fcn = makeConstrainToRectFcn( ...
+    'imfreehand', ...
+    handles.axes1.XLim, ...
+    handles.axes1.YLim ...
+    );
+
+while get(hObject,'Value')
+    % TODO Check that this is correct
+    set(hObject, 'Interruptible', 'Off')
+    
+    l = size(regions,1) + 1;
+    regions{l, 1} = imfreehand('Closed',true);
+    
+    api = iptgetapi(regions{end,1});
+    api.setPositionConstraintFcn(fcn);
+    
+    region_data = wait(regions{end,1});
+    
+    % Launch label_select
+    ImageClickCallback(handles.axes1)
+    
+    if ~isempty(region_data)
+        % Set polygon colour
+        api.setColor('green');
+        
+        % Callback for updating region info when it is moved
+        addNewPositionCallback(regions{end, 1},...
+            (@(p) polygonPositionCallback(p,l)) ...
+            );
+    end
+    
+    % TODO Check that this is correct
+    set(hObject, 'Interruptible', 'On')
 end
 
 end
