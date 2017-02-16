@@ -68,10 +68,10 @@ labels = cell(0);
 % Initialize regions as an empty cell array
 regions = cell(0);
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% DEV OPTION - COMMENT WHEN FINISHED!!!!         %
-img_file_path = './data/BCN877_72h_x20bf_3.jpg'; %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % DEV OPTION - COMMENT WHEN FINISHED!!!!         %
+% img_file_path = './data/BCN877_72h_x20bf_3.jpg'; %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Choose default command line output for labeling
 handles.output = hObject;
@@ -157,11 +157,11 @@ function figure1_CloseRequestFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % DEV OPTION - UNCOMMENT WHEN FINISHED!!!! %
-% % Open main menu figure                    %
-% % main                                       %
-% % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DEV OPTION - UNCOMMENT WHEN FINISHED!!!! %
+% Open main menu figure                    %
+main                                       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Hint: delete(hObject) closes the figure
 delete(hObject);
@@ -262,9 +262,10 @@ img_name = regexprep(img_file_path,pattern,replacement);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DEV - Activate compact when finished!!                                   %
-savejson('', labels, 'FileName', [img_name,'_labels.json'], 'Compact', 0); %
+savejson('', labels, 'FileName', [img_name,'_labels.json'], 'Compact', 1); %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+helpdlg('Labels have been saved','Save success')
 end
 
 
