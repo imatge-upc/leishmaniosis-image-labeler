@@ -56,11 +56,9 @@ function labeling_OpeningFcn(hObject, eventdata, handles, varargin)
 global img_file_path
 global labels
 global regions
-global rect_on
-global poly_on
+global active_region_type
 
-rect_on = 0;
-poly_on = 0;
+active_region_type = '';
 
 % Initialize labels as an empty cell array
 labels = cell(0);
@@ -179,11 +177,9 @@ function toggle_rectangle_Callback(hObject, eventdata, handles)
 
 global rect_data
 global regions
-global rect_on
-global poly_on
+global active_region_type
 
-rect_on = 1;
-poly_on = 0;
+active_region_type = 'rectangle';
 
 fcn = makeConstrainToRectFcn( ...
     'imrect', ...
@@ -279,11 +275,9 @@ function toggle_polygon_Callback(hObject, eventdata, handles)
 
 global rect_data
 global regions
-global rect_on
-global poly_on
+global active_region_type
 
-rect_on = 0;
-poly_on = 1;
+active_region_type = 'polygon';
 
 fcn = makeConstrainToRectFcn( ...
     'impoly', ...
@@ -341,24 +335,24 @@ function set_square_Callback(hObject, eventdata, handles)
 
 % global rect_data
 global regions
-global rect_on
+global active_region_type
 
 % Check that rectangles are being selected and there is at least one selected
 try
-    assert(rect_on == 1,...
+    assert(strcmp(active_region_type,'rectangle'),...
         'MATLAB:Rect:Unselected',...
         'This option is only available for rectangle regions')
     assert(size(regions,1) >= 1,...
         'MATLAB:Rect:No_rectangles', 'There are no rectangles to set square')
     
+    position = getPosition(regions{end,1});
+
+    max_dim = max(position(3:4));
+
+    setPosition(regions{end,1}, [position(1:2),max_dim, max_dim])
+
 catch MException
     helpdlg(MException.message,MException.identifier)
 end
-
-position = getPosition(regions{end,1});
-
-max_dim = max(position(3:4));
-
-setPosition(regions{end,1}, [position(1:2),max_dim, max_dim])
 
 end
