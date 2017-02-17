@@ -22,7 +22,7 @@ function varargout = labeling(varargin)
 
 % Edit the above text to modify the response to help labeling
 
-% Last Modified by GUIDE v2.5 17-Feb-2017 13:03:47
+% Last Modified by GUIDE v2.5 17-Feb-2017 13:14:01
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -385,6 +385,59 @@ while get(hObject,'Value')
     regions{l, 1} = imfreehand('Closed',true);
     
     api = iptgetapi(regions{end,1});
+    api.setPositionConstraintFcn(fcn);
+    
+    region_data = wait(regions{end,1});
+    
+    % Launch label_select
+    ImageClickCallback(handles.axes1)
+    
+    if ~isempty(region_data)
+        % Set polygon colour
+        api.setColor('green');
+        
+        % Callback for updating region info when it is moved
+        addNewPositionCallback(regions{end, 1},...
+            (@(p) polygonPositionCallback(p,l)) ...
+            );
+    end
+    
+    % TODO Check that this is correct
+    set(hObject, 'Interruptible', 'On')
+end
+
+end
+
+
+% --- Executes on button press in elliptical_region.
+function elliptical_region_Callback(hObject, eventdata, handles)
+% hObject    handle to elliptical_region (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of elliptical_region
+
+global region_data
+global regions
+global active_region_type
+
+active_region_type = 'ellipse';
+
+fcn = makeConstrainToRectFcn( ...
+    'imellipse', ...
+    handles.axes1.XLim, ...
+    handles.axes1.YLim ...
+    );
+
+while get(hObject,'Value')
+    % TODO Check that this is correct
+    set(hObject, 'Interruptible', 'Off')
+    
+    l = size(regions,1) + 1;
+    regions{l, 1} = imellipse;
+    
+    api = iptgetapi(regions{end,1});
+    api.setResizable(true);
     api.setPositionConstraintFcn(fcn);
     
     region_data = wait(regions{end,1});
