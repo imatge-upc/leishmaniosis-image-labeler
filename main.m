@@ -173,8 +173,8 @@ global img_file_path
 
 % Detect if an image has been selected
 if ~strcmp(img_file_path, '')
-    % Open labeling applet figure
-    labeling
+    % Open new_labeling applet figure
+    new_labeling
     
     % Close this figure
     close(get(hObject, 'Parent'))
