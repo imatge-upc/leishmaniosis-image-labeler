@@ -1,37 +1,37 @@
-function varargout = labeling(varargin)
-% LABELING MATLAB code for labeling.fig
-%      LABELING, by itself, creates a new LABELING or raises the existing
+function varargout = new_labeling(varargin)
+% NEW_LABELING MATLAB code for new_labeling.fig
+%      NEW_LABELING, by itself, creates a new NEW_LABELING or raises the existing
 %      singleton*.
 %
-%      H = LABELING returns the handle to a new LABELING or the handle to
+%      H = NEW_LABELING returns the handle to a new NEW_LABELING or the handle to
 %      the existing singleton*.
 %
-%      LABELING('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in LABELING.M with the given input arguments.
+%      NEW_LABELING('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in NEW_LABELING.M with the given input arguments.
 %
-%      LABELING('Property','Value',...) creates a new LABELING or raises the
+%      NEW_LABELING('Property','Value',...) creates a new NEW_LABELING or raises the
 %      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before labeling_OpeningFcn gets called.  An
+%      applied to the GUI before new_labeling_OpeningFcn gets called.  An
 %      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to labeling_OpeningFcn via varargin.
+%      stop.  All inputs are passed to new_labeling_OpeningFcn via varargin.
 %
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help labeling
+% Edit the above text to modify the response to help new_labeling
 
-% Last Modified by GUIDE v2.5 17-Feb-2017 13:14:01
+% Last Modified by GUIDE v2.5 17-Feb-2017 18:11:06
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
-    'gui_Singleton',  gui_Singleton, ...
-    'gui_OpeningFcn', @labeling_OpeningFcn, ...
-    'gui_OutputFcn',  @labeling_OutputFcn, ...
-    'gui_LayoutFcn',  [] , ...
-    'gui_Callback',   []);
+                   'gui_Singleton',  gui_Singleton, ...
+                   'gui_OpeningFcn', @new_labeling_OpeningFcn, ...
+                   'gui_OutputFcn',  @new_labeling_OutputFcn, ...
+                   'gui_LayoutFcn',  [] , ...
+                   'gui_Callback',   []);
 if nargin && ischar(varargin{1})
     gui_State.gui_Callback = str2func(varargin{1});
 end
@@ -41,18 +41,16 @@ if nargout
 else
     gui_mainfcn(gui_State, varargin{:});
 end
-
-end
 % End initialization code - DO NOT EDIT
 
 
-% --- Executes just before labeling is made visible.
-function labeling_OpeningFcn(hObject, eventdata, handles, varargin)
+% --- Executes just before new_labeling is made visible.
+function new_labeling_OpeningFcn(hObject, eventdata, handles, varargin)
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to labeling (see VARARGIN)
+% varargin   command line arguments to new_labeling (see VARARGIN)
 global img_file_path
 global labels
 global regions
@@ -71,7 +69,7 @@ regions = cell(0);
 % img_file_path = './data/BCN877_72h_x20bf_3.jpg'; %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Choose default command line output for labeling
+% Choose default command line output for new_labeling
 handles.output = hObject;
 
 % Set image file path as the window title
@@ -82,33 +80,19 @@ set(hObject,'Units', 'normalized');
 handles.original_size = get(hObject, 'outerposition');
 
 % Plot the selected image
-image = imread(img_file_path);
-imageHandle = imshow(image);
+myImage = imread(img_file_path);
+axes(handles.image_axes);
+imshow(myImage);
 
 % Update handles structure
 guidata(hObject, handles);
 
-end
-
-
-% --- Executes when the rectangle is double-clicked.
-function ImageClickCallback ( objectHandle , eventData )
-% This function opens a sub-window to select the type of parasite in the picture
-global px_coordinates
-
-axesHandle  = get(objectHandle,'Parent');
-
-set(axesHandle, 'Units', 'Pixels');
-coordinates = get(axesHandle,'CurrentPoint');
-px_coordinates = floor(coordinates(1,1:2));
-
-uiwait(label_select)
-
-end
+% UIWAIT makes new_labeling wait for user response (see UIRESUME)
+% uiwait(handles.figure1);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = labeling_OutputFcn(hObject, eventdata, handles)
+function varargout = new_labeling_OutputFcn(hObject, eventdata, handles) 
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -116,38 +100,6 @@ function varargout = labeling_OutputFcn(hObject, eventdata, handles)
 
 % Get default command line output from handles structure
 varargout{1} = handles.output;
-
-end
-
-
-% --- Executes on button press in toggle_size.
-function toggle_size_Callback(hObject, eventdata, handles)
-% hObject    handle to toggle_size (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-set(get(hObject, 'Parent'),'Units', 'normalized')
-
-if isequal(get(get(hObject, 'Parent'), 'outerposition'), [0 0 1 1])
-    % The window is maximized -> unmaximize
-    set(get(hObject, 'Parent'),'Units', 'normalized', 'outerposition', handles.original_size);
-    
-    set(handles.axes1, 'Units', 'normalized', ...
-        'outerposition', [-0.0986   -0.0234    1.1546    1.0061]);
-    
-    set(hObject, 'String', 'Maximize');
-else
-    % The window is not maximize -> maximize
-    set(get(hObject, 'Parent'), 'Units', 'normalized', ...
-        'outerposition',[0 0 1 1]);
-    
-    set(handles.axes1, 'Units', 'normalized', ...
-        'outerposition', [-0.0986   -0.0234    1.1546    1.0061]);
-    
-    set(hObject, 'String', 'Restore');
-end
-
-end
-
 
 % --- Executes when user attempts to close figure1.
 function figure1_CloseRequestFcn(hObject, eventdata, handles)
@@ -164,80 +116,47 @@ main                                       %
 % Hint: delete(hObject) closes the figure
 delete(hObject);
 
-end
+% --- Executes when a region is double-clicked.
+function RegionSelectCallback ( objectHandle , eventData )
+% This function opens a sub-window to select the type of parasite in the picture
+global px_coordinates
+
+axesHandle  = get(objectHandle,'Parent');
+
+set(axesHandle, 'Units', 'Pixels');
+coordinates = get(axesHandle,'CurrentPoint');
+px_coordinates = floor(coordinates(1,1:2));
+
+uiwait(label_select)
 
 
-% --- Executes on button press in toggle_rectangle.
-function toggle_rectangle_Callback(hObject, eventdata, handles)
-% hObject    handle to toggle_rectangle (see GCBO)
+% --- Executes on button press in toggle_size.
+function toggle_size_Callback(hObject, eventdata, handles)
+% hObject    handle to toggle_size (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of toggle_rectangle
+% Hint: get(hObject,'Value') returns toggle state of toggle_size
+set(get(hObject, 'Parent'),'Units', 'normalized')
 
-global region_data
-global regions
-global active_region_type
-
-active_region_type = 'rectangle';
-
-fcn = makeConstrainToRectFcn( ...
-    'imrect', ...
-    handles.axes1.XLim, ...
-    handles.axes1.YLim ...
-    );
-
-while get(hObject,'Value')
-    % TODO Check that this is correct
-    set(hObject, 'Interruptible', 'Off')
+if isequal(get(get(hObject, 'Parent'), 'outerposition'), [0 0 1 1])
+    % The window is maximized -> unmaximize
+    set(get(hObject, 'Parent'),'Units', 'normalized', 'outerposition', handles.original_size);
     
-    l = size(regions,1) + 1;
-    regions{l, 1} = imrect;
+    set(handles.image_axes, 'Units', 'normalized', ...
+        'outerposition', [-0.0986   -0.0234    1.1546    1.0061]);
     
-    setPositionConstraintFcn(regions{end,1},fcn);
+    set(hObject, 'String', 'Maximize');
+else
+    % The window is not maximize -> maximize
+    set(get(hObject, 'Parent'), 'Units', 'normalized', ...
+        'outerposition',[0 0 1 1]);
     
-    region_data = wait(regions{end,1});
+    set(handles.image_axes, 'Units', 'normalized', ...
+        'outerposition', [-0.0986   -0.0234    1.1546    1.0061]);
     
-    % Launch label_select
-    ImageClickCallback(handles.axes1)
-    
-    if ~isempty(region_data)
-        % Add color rectangle on top of the drawn one
-        regions{l, 2} = rectangle(...
-            'Position', region_data, ...
-            'LineWidth',2, ...
-            'EdgeColor','g'...
-            );
-        
-        % Callback for updating rectangle info when it is moved
-        addNewPositionCallback(regions{end, 1},...
-            (@(p) rectanglePositionCallback(p,l)) ...
-            );
-    end
-    
-    % TODO Check that this is correct
-    set(hObject, 'Interruptible', 'On')
+    set(hObject, 'String', 'Restore');
 end
-
-end
-
-% --- Executes on when the user moves a rectangle.
-function rectanglePositionCallback(region_data, l)
-
-global labels
-global regions
-
-% Update position of the color rectangle
-set(regions{l,2}, 'Position', region_data)
-
-% Update rectangle position in labels cell array
-labels{l}.x = region_data(1);
-labels{l}.y = region_data(2);
-labels{l}.width = region_data(3);
-labels{l}.height = region_data(4);
-
-end
-
 
 % --- Executes on button press in save_button.
 function save_button_Callback(hObject, eventdata, handles)
@@ -262,12 +181,115 @@ savejson('', labels, 'FileName', [img_name,'_labels.json'], 'Compact', 1); %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 helpdlg('Labels have been saved','Save success')
+
+% --- Executes on button press in set_square.
+function set_square_Callback(hObject, eventdata, handles)
+% hObject    handle to set_square (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+global regions
+global active_region_type
+
+% Check that rectangles are being selected and there is at least one selected
+try
+    assert(strcmp(active_region_type,'rectangle') || ...
+        strcmp(active_region_type,'ellipse'),...
+        'MATLAB:Wrong:Region',...
+        'This option is only available for rectangle or ellipse regions')
+    assert(size(regions,1) >= 1,...
+        'MATLAB:No:Region', 'There is no region to set to 1:1')
+    
+    position = getPosition(regions{end,1});
+
+    max_dim = max(position(3:4));
+
+    setPosition(regions{end,1}, [position(1:2),max_dim, max_dim])
+
+catch MException
+    helpdlg(MException.message,MException.identifier)
 end
 
+% --- Executes on button press in rectangle_region.
+function rectangle_region_Callback(hObject, eventdata, handles)
+% hObject    handle to rectangle_region (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
 
-% --- Executes on button press in toggle_polygon.
-function toggle_polygon_Callback(hObject, eventdata, handles)
-% hObject    handle to toggle_polygon (see GCBO)
+% Hint: get(hObject,'Value') returns toggle state of rectangle_region
+global region_data
+global regions
+global active_region_type
+
+active_region_type = 'rectangle';
+
+fcn = makeConstrainToRectFcn( ...
+    'imrect', ...
+    handles.image_axes.XLim, ...
+    handles.image_axes.YLim ...
+    );
+
+while get(hObject,'Value')
+    % TODO Check that this is correct
+    set(hObject, 'Interruptible', 'Off')
+    
+    l = size(regions,1) + 1;
+    regions{l, 1} = imrect;
+    
+    setPositionConstraintFcn(regions{end,1},fcn);
+    
+    wait(regions{end,1});
+    
+    region_data = getPosition(regions{end,1});
+    
+    % Launch label_select
+    RegionSelectCallback(handles.image_axes)
+    
+    if ~isempty(region_data)
+        % Add color rectangle on top of the drawn one
+        regions{l, 2} = rectangle(...
+            'Position', region_data, ...
+            'LineWidth',2, ...
+            'EdgeColor','g'...
+            );
+        
+        % Callback for updating rectangle info when it is moved
+        addNewPositionCallback(regions{end, 1},...
+            (@(p) rectangleEllipsePositionCallback(p,l)) ...
+            );
+    end
+    
+    % TODO Check that this is correct
+    set(hObject, 'Interruptible', 'On')
+end
+
+% --- Executes on when the user moves a rectangle.
+function rectangleEllipsePositionCallback(region_data, l)
+
+global labels
+global regions
+
+% Update position of the color rectangle
+set(regions{l,2}, 'Position', region_data)
+
+% Update rectangle position in labels cell array
+labels{l}.x = region_data(1);
+labels{l}.y = region_data(2);
+labels{l}.width = region_data(3);
+labels{l}.height = region_data(4);
+
+% --- Executes on when the user moves a non-rectangular region.
+function regionPositionCallback(region_data, l)
+
+global labels
+
+% Update region position in labels cell array
+labels{l}.Position = region_data;
+
+
+% --- Executes on button press in polygon_region.
+function polygon_region_Callback(hObject, eventdata, handles)
+% hObject    handle to polygon_region (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
@@ -281,8 +303,8 @@ active_region_type = 'polygon';
 
 fcn = makeConstrainToRectFcn( ...
     'impoly', ...
-    handles.axes1.XLim, ...
-    handles.axes1.YLim ...
+    handles.image_axes.XLim, ...
+    handles.image_axes.YLim ...
     );
 
 while get(hObject,'Value')
@@ -295,10 +317,12 @@ while get(hObject,'Value')
     api = iptgetapi(regions{end,1});
     api.setPositionConstraintFcn(fcn);
     
-    region_data = wait(regions{end,1});
+    wait(regions{end,1});
+    
+    region_data = getPosition(regions{end,1});
     
     % Launch label_select
-    ImageClickCallback(handles.axes1)
+    RegionSelectCallback(handles.image_axes)
     
     if ~isempty(region_data)
         % Set polygon colour
@@ -306,7 +330,7 @@ while get(hObject,'Value')
         
         % Callback for updating region info when it is moved
         addNewPositionCallback(regions{end, 1},...
-            (@(p) polygonPositionCallback(p,l)) ...
+            (@(p) regionPositionCallback(p,l)) ...
             );
     end
     
@@ -314,46 +338,57 @@ while get(hObject,'Value')
     set(hObject, 'Interruptible', 'On')
 end
 
-end
 
-% --- Executes on when the user moves a polygon.
-function polygonPositionCallback(region_data, l)
-
-global labels
-
-% Update region position in labels cell array
-labels{l}.Position = region_data;
-
-end
-
-
-% --- Executes on button press in set_square.
-function set_square_Callback(hObject, eventdata, handles)
-% hObject    handle to set_square (see GCBO)
+% --- Executes on button press in ellipse_region.
+function ellipse_region_Callback(hObject, eventdata, handles)
+% hObject    handle to ellipse_region (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+% Hint: get(hObject,'Value') returns toggle state of elliptical_region
+
+global region_data
 global regions
 global active_region_type
 
-% Check that rectangles are being selected and there is at least one selected
-try
-    assert(strcmp(active_region_type,'rectangle'),...
-        'MATLAB:Rect:Unselected',...
-        'This option is only available for rectangle regions')
-    assert(size(regions,1) >= 1,...
-        'MATLAB:Rect:No_rectangles', 'There are no rectangles to set square')
+active_region_type = 'ellipse';
+
+fcn = makeConstrainToRectFcn( ...
+    'imellipse', ...
+    handles.image_axes.XLim, ...
+    handles.image_axes.YLim ...
+    );
+
+while get(hObject,'Value')
+    % TODO Check that this is correct
+    set(hObject, 'Interruptible', 'Off')
+%     'PositionConstraintFcn'
+    l = size(regions,1) + 1;
+    regions{l, 1} = imellipse;
     
-    position = getPosition(regions{end,1});
-
-    max_dim = max(position(3:4));
-
-    setPosition(regions{end,1}, [position(1:2),max_dim, max_dim])
-
-catch MException
-    helpdlg(MException.message,MException.identifier)
-end
-
+    api = iptgetapi(regions{end,1});
+    api.setResizable(true);
+    api.setPositionConstraintFcn(fcn);
+    
+    wait(regions{end,1});
+    
+    region_data = getPosition(regions{end,1});
+    
+    % Launch label_select
+    RegionSelectCallback(handles.image_axes)
+    
+    if ~isempty(region_data)
+        % Set polygon colour
+        api.setColor('green');
+        
+        % Callback for updating region info when it is moved
+        addNewPositionCallback(regions{end, 1},...
+            (@(p) rectangleEllipsePositionCallback(p,l)) ...
+            );
+    end
+    
+    % TODO Check that this is correct
+    set(hObject, 'Interruptible', 'On')
 end
 
 
@@ -373,8 +408,8 @@ active_region_type = 'freehand';
 
 fcn = makeConstrainToRectFcn( ...
     'imfreehand', ...
-    handles.axes1.XLim, ...
-    handles.axes1.YLim ...
+    handles.image_axes.XLim, ...
+    handles.image_axes.YLim ...
     );
 
 while get(hObject,'Value')
@@ -387,10 +422,12 @@ while get(hObject,'Value')
     api = iptgetapi(regions{end,1});
     api.setPositionConstraintFcn(fcn);
     
-    region_data = wait(regions{end,1});
+    wait(regions{end,1});
+    
+    region_data = getPosition(regions{end,1});
     
     % Launch label_select
-    ImageClickCallback(handles.axes1)
+    RegionSelectCallback(handles.image_axes)
     
     if ~isempty(region_data)
         % Set polygon colour
@@ -398,65 +435,10 @@ while get(hObject,'Value')
         
         % Callback for updating region info when it is moved
         addNewPositionCallback(regions{end, 1},...
-            (@(p) polygonPositionCallback(p,l)) ...
+            (@(p) regionPositionCallback(p,l)) ...
             );
     end
     
     % TODO Check that this is correct
     set(hObject, 'Interruptible', 'On')
-end
-
-end
-
-
-% --- Executes on button press in elliptical_region.
-function elliptical_region_Callback(hObject, eventdata, handles)
-% hObject    handle to elliptical_region (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of elliptical_region
-
-global region_data
-global regions
-global active_region_type
-
-active_region_type = 'ellipse';
-
-fcn = makeConstrainToRectFcn( ...
-    'imellipse', ...
-    handles.axes1.XLim, ...
-    handles.axes1.YLim ...
-    );
-
-while get(hObject,'Value')
-    % TODO Check that this is correct
-    set(hObject, 'Interruptible', 'Off')
-    
-    l = size(regions,1) + 1;
-    regions{l, 1} = imellipse;
-    
-    api = iptgetapi(regions{end,1});
-    api.setResizable(true);
-    api.setPositionConstraintFcn(fcn);
-    
-    region_data = wait(regions{end,1});
-    
-    % Launch label_select
-    ImageClickCallback(handles.axes1)
-    
-    if ~isempty(region_data)
-        % Set polygon colour
-        api.setColor('green');
-        
-        % Callback for updating region info when it is moved
-        addNewPositionCallback(regions{end, 1},...
-            (@(p) polygonPositionCallback(p,l)) ...
-            );
-    end
-    
-    % TODO Check that this is correct
-    set(hObject, 'Interruptible', 'On')
-end
-
 end
