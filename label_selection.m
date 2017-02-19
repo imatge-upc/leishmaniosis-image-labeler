@@ -97,9 +97,15 @@ function parasite_types_CreateFcn(hObject, eventdata, handles)
 
 % Hint: popupmenu controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
+global parasite_types
+
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+parasite_types = get(hObject, 'String');
+
+
 
 
 % --- Executes on button press in ok_button.

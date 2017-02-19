@@ -22,16 +22,16 @@ function varargout = region_selection(varargin)
 
 % Edit the above text to modify the response to help region_selection
 
-% Last Modified by GUIDE v2.5 19-Feb-2017 15:46:18
+% Last Modified by GUIDE v2.5 19-Feb-2017 20:28:55
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
-                   'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @region_selection_OpeningFcn, ...
-                   'gui_OutputFcn',  @region_selection_OutputFcn, ...
-                   'gui_LayoutFcn',  [] , ...
-                   'gui_Callback',   []);
+    'gui_Singleton',  gui_Singleton, ...
+    'gui_OpeningFcn', @region_selection_OpeningFcn, ...
+    'gui_OutputFcn',  @region_selection_OutputFcn, ...
+    'gui_LayoutFcn',  [] , ...
+    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
     gui_State.gui_Callback = str2func(varargin{1});
 end
@@ -55,6 +55,7 @@ global img_file_path
 global labels
 global regions
 global active_region_type
+global region_texts
 
 active_region_type = '';
 
@@ -63,6 +64,7 @@ labels = cell(0);
 
 % Initialize regions as an empty cell array
 regions = cell(0);
+region_texts = cell(0);
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % % DEV OPTION - COMMENT WHEN FINISHED!!!!         %
@@ -92,7 +94,7 @@ guidata(hObject, handles);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = region_selection_OutputFcn(hObject, eventdata, handles) 
+function varargout = region_selection_OutputFcn(hObject, eventdata, handles)
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -110,7 +112,7 @@ function figure1_CloseRequestFcn(hObject, eventdata, handles)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DEV OPTION - UNCOMMENT WHEN FINISHED!!!! %
 % Open main menu figure                    %
-main_menu                                       %
+main_menu                                  %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Hint: delete(hObject) closes the figure
@@ -158,6 +160,43 @@ else
     set(hObject, 'String', 'Restore');
 end
 
+% --- Executes on button press in show_hide_labels.
+function show_hide_labels_Callback(hObject, eventdata, handles)
+% hObject    handle to show_hide_labels (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of show_hide_labels
+global region_texts
+
+try
+    assert(numel(region_texts) > 0,...
+        'MATLAB:Hide:Error',...
+        'There are no labels to hide/show')
+    
+    if get(hObject, 'Value') == 1
+        % Hide labels
+        arrayfun(@(text) hide_text_callback(text), region_texts);
+        
+        set(hObject, 'String', 'Show labels');
+    else
+        % Show labels
+        arrayfun(@(text) show_text_callback(text), region_texts);
+        
+        set(hObject, 'String', 'Hide labels');
+    end
+    
+catch MException
+    warndlg(MException.message,MException.identifier)
+    set(hObject, 'Value', 0);
+end
+
+function hide_text_callback(text)
+text{1}.Visible = 'off';
+
+function show_text_callback(text)
+text{1}.Visible = 'on';
+
 % --- Executes on button press in save_button.
 function save_button_Callback(hObject, eventdata, handles)
 % hObject    handle to save_button (see GCBO)
@@ -201,11 +240,11 @@ try
         'MATLAB:No:Region', 'There is no region to set to 1:1')
     
     position = getPosition(regions{end,1});
-
+    
     max_dim = max(position(3:4));
-
+    
     setPosition(regions{end,1}, [position(1:2),max_dim, max_dim])
-
+    
 catch MException
     helpdlg(MException.message,MException.identifier)
 end
@@ -220,6 +259,9 @@ function rectangle_region_Callback(hObject, eventdata, handles)
 global region_data
 global regions
 global active_region_type
+global labels
+global parasite_types
+global region_texts
 
 active_region_type = 'rectangle';
 
@@ -236,7 +278,8 @@ while get(hObject,'Value')
     l = size(regions,1) + 1;
     regions{l, 1} = imrect;
     
-    setPositionConstraintFcn(regions{end,1},fcn);
+    api = iptgetapi(regions{end,1});
+    api.setPositionConstraintFcn(fcn);
     
     wait(regions{end,1});
     
@@ -246,16 +289,18 @@ while get(hObject,'Value')
     RegionSelectCallback(handles.image_axes)
     
     if ~isempty(region_data)
-        % Add color rectangle on top of the drawn one
-        regions{l, 2} = rectangle(...
-            'Position', region_data, ...
-            'LineWidth',2, ...
-            'EdgeColor','g'...
+        % Set region colour
+        api.setColor('green');
+        
+        region_texts{l,1} = text(region_data(1)+(region_data(3)/2), region_data(2)+region_data(4),...
+            parasite_types{labels{l}.parasite_type},...
+            'HorizontalAlignment', 'center',...
+            'VerticalAlignment', 'top'...
             );
         
         % Callback for updating rectangle info when it is moved
         addNewPositionCallback(regions{end, 1},...
-            (@(p) rectangleEllipsePositionCallback(p,l)) ...
+            (@(p) rectangleEllipsePositionCallback(p,l,region_texts{l,1})) ...
             );
     end
     
@@ -264,13 +309,12 @@ while get(hObject,'Value')
 end
 
 % --- Executes on when the user moves a rectangle.
-function rectangleEllipsePositionCallback(region_data, l)
+function rectangleEllipsePositionCallback(region_data, l, text)
 
 global labels
-global regions
 
 % Update position of the color rectangle
-set(regions{l,2}, 'Position', region_data)
+text.Position = [region_data(1)+(region_data(3)/2), region_data(2)+region_data(4)];
 
 % Update rectangle position in labels cell array
 labels{l}.x = region_data(1);
@@ -279,12 +323,80 @@ labels{l}.width = region_data(3);
 labels{l}.height = region_data(4);
 
 % --- Executes on when the user moves a non-rectangular region.
-function regionPositionCallback(region_data, l)
+function regionPositionCallback(region_data, l, text)
 
 global labels
 
+max_h = max(region_data(:,1));
+min_h = min(region_data(:,1));
+text_v = max(region_data(:,2));
+
+text.Position = [(min_h+max_h)/2, text_v];
+
 % Update region position in labels cell array
 labels{l}.Position = region_data;
+
+
+% --- Executes on button press in ellipse_region.
+function ellipse_region_Callback(hObject, eventdata, handles)
+% hObject    handle to ellipse_region (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of elliptical_region
+
+global region_data
+global regions
+global active_region_type
+global parasite_types
+global labels
+global region_texts
+
+active_region_type = 'ellipse';
+
+fcn = makeConstrainToRectFcn( ...
+    'imellipse', ...
+    handles.image_axes.XLim, ...
+    handles.image_axes.YLim ...
+    );
+
+while get(hObject,'Value')
+    % TODO Check that this is correct
+    set(hObject, 'Interruptible', 'Off')
+    %     'PositionConstraintFcn'
+    l = size(regions,1) + 1;
+    regions{l, 1} = imellipse;
+    
+    api = iptgetapi(regions{end,1});
+    api.setResizable(true);
+    api.setPositionConstraintFcn(fcn);
+    
+    wait(regions{end,1});
+    
+    region_data = getPosition(regions{end,1});
+    
+    % Launch label_selection
+    RegionSelectCallback(handles.image_axes)
+    
+    if ~isempty(region_data)
+        % Set polygon colour
+        api.setColor('green');
+        
+        region_texts{l,1} = text(region_data(1)+(region_data(3)/2), region_data(2)+region_data(4),...
+            parasite_types{labels{l}.parasite_type},...
+            'HorizontalAlignment', 'center',...
+            'VerticalAlignment', 'top'...
+            );
+        
+        % Callback for updating region info when it is moved
+        addNewPositionCallback(regions{end, 1},...
+            (@(p) rectangleEllipsePositionCallback(p,l,region_texts{l,1})) ...
+            );
+    end
+    
+    % TODO Check that this is correct
+    set(hObject, 'Interruptible', 'On')
+end
 
 
 % --- Executes on button press in polygon_region.
@@ -298,6 +410,9 @@ function polygon_region_Callback(hObject, eventdata, handles)
 global region_data
 global regions
 global active_region_type
+global labels
+global parasite_types
+global region_texts
 
 active_region_type = 'polygon';
 
@@ -328,62 +443,19 @@ while get(hObject,'Value')
         % Set polygon colour
         api.setColor('green');
         
-        % Callback for updating region info when it is moved
-        addNewPositionCallback(regions{end, 1},...
-            (@(p) regionPositionCallback(p,l)) ...
+        max_h = max(region_data(:,1));
+        min_h = min(region_data(:,1));
+        text_v = max(region_data(:,2));
+        
+        region_texts{l,1} = text((min_h+max_h)/2, text_v,...
+            parasite_types{labels{l}.parasite_type},...
+            'HorizontalAlignment', 'center',...
+            'VerticalAlignment', 'top'...
             );
-    end
-    
-    % TODO Check that this is correct
-    set(hObject, 'Interruptible', 'On')
-end
-
-
-% --- Executes on button press in ellipse_region.
-function ellipse_region_Callback(hObject, eventdata, handles)
-% hObject    handle to ellipse_region (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of elliptical_region
-
-global region_data
-global regions
-global active_region_type
-
-active_region_type = 'ellipse';
-
-fcn = makeConstrainToRectFcn( ...
-    'imellipse', ...
-    handles.image_axes.XLim, ...
-    handles.image_axes.YLim ...
-    );
-
-while get(hObject,'Value')
-    % TODO Check that this is correct
-    set(hObject, 'Interruptible', 'Off')
-%     'PositionConstraintFcn'
-    l = size(regions,1) + 1;
-    regions{l, 1} = imellipse;
-    
-    api = iptgetapi(regions{end,1});
-    api.setResizable(true);
-    api.setPositionConstraintFcn(fcn);
-    
-    wait(regions{end,1});
-    
-    region_data = getPosition(regions{end,1});
-    
-    % Launch label_selection
-    RegionSelectCallback(handles.image_axes)
-    
-    if ~isempty(region_data)
-        % Set polygon colour
-        api.setColor('green');
         
         % Callback for updating region info when it is moved
         addNewPositionCallback(regions{end, 1},...
-            (@(p) rectangleEllipsePositionCallback(p,l)) ...
+            (@(p) regionPositionCallback(p,l,region_texts{l,1})) ...
             );
     end
     
@@ -403,6 +475,9 @@ function freehand_region_Callback(hObject, eventdata, handles)
 global region_data
 global regions
 global active_region_type
+global labels
+global parasite_types
+global region_texts
 
 active_region_type = 'freehand';
 
@@ -433,9 +508,19 @@ while get(hObject,'Value')
         % Set polygon colour
         api.setColor('green');
         
+        max_h = max(region_data(:,1));
+        min_h = min(region_data(:,1));
+        text_v = max(region_data(:,2));
+        
+        region_texts{l,1} = text((min_h+max_h)/2, text_v,...
+            parasite_types{labels{l}.parasite_type},...
+            'HorizontalAlignment', 'center',...
+            'VerticalAlignment', 'top'...
+            );
+        
         % Callback for updating region info when it is moved
         addNewPositionCallback(regions{end, 1},...
-            (@(p) regionPositionCallback(p,l)) ...
+            (@(p) regionPositionCallback(p,l,region_texts{l,1})) ...
             );
     end
     
