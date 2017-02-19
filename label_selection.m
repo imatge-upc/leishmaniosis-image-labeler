@@ -1,35 +1,35 @@
-function varargout = label_select(varargin)
-% LABEL_SELECT MATLAB code for label_select.fig
-%      LABEL_SELECT, by itself, creates a new LABEL_SELECT or raises the existing
+function varargout = label_selection(varargin)
+% LABEL_SELECTION MATLAB code for label_selection.fig
+%      LABEL_SELECTION, by itself, creates a new LABEL_SELECTION or raises the existing
 %      singleton*.
 %
-%      H = LABEL_SELECT returns the handle to a new LABEL_SELECT or the handle to
+%      H = LABEL_SELECTION returns the handle to a new LABEL_SELECTION or the handle to
 %      the existing singleton*.
 %
-%      LABEL_SELECT('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in LABEL_SELECT.M with the given input arguments.
+%      LABEL_SELECTION('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in LABEL_SELECTION.M with the given input arguments.
 %
-%      LABEL_SELECT('Property','Value',...) creates a new LABEL_SELECT or raises the
+%      LABEL_SELECTION('Property','Value',...) creates a new LABEL_SELECTION or raises the
 %      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before label_select_OpeningFcn gets called.  An
+%      applied to the GUI before label_selection_OpeningFcn gets called.  An
 %      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to label_select_OpeningFcn via varargin.
+%      stop.  All inputs are passed to label_selection_OpeningFcn via varargin.
 %
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help label_select
+% Edit the above text to modify the response to help label_selection
 
-% Last Modified by GUIDE v2.5 25-Jan-2017 20:12:00
+% Last Modified by GUIDE v2.5 19-Feb-2017 15:47:50
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
                    'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @label_select_OpeningFcn, ...
-                   'gui_OutputFcn',  @label_select_OutputFcn, ...
+                   'gui_OpeningFcn', @label_selection_OpeningFcn, ...
+                   'gui_OutputFcn',  @label_selection_OutputFcn, ...
                    'gui_LayoutFcn',  [] , ...
                    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
@@ -44,18 +44,18 @@ end
 % End initialization code - DO NOT EDIT
 
 
-% --- Executes just before label_select is made visible.
-function label_select_OpeningFcn(hObject, eventdata, handles, varargin)
+% --- Executes just before label_selection is made visible.
+function label_selection_OpeningFcn(hObject, eventdata, handles, varargin)
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to label_select (see VARARGIN)
+% varargin   command line arguments to label_selection (see VARARGIN)
 
 % Get current pointer location
 pointer_pos(1,1:2)=get(0,'Pointerlocation');
 
-% Choose default command line output for label_select
+% Choose default command line output for label_selection
 handles.output = hObject;
 
 % Position the window at the current pointer's coordinates
@@ -70,7 +70,7 @@ guidata(hObject, handles);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = label_select_OutputFcn(hObject, eventdata, handles)
+function varargout = label_selection_OutputFcn(hObject, eventdata, handles)
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB

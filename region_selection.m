@@ -1,35 +1,35 @@
-function varargout = new_labeling(varargin)
-% NEW_LABELING MATLAB code for new_labeling.fig
-%      NEW_LABELING, by itself, creates a new NEW_LABELING or raises the existing
+function varargout = region_selection(varargin)
+% REGION_SELECTION MATLAB code for region_selection.fig
+%      REGION_SELECTION, by itself, creates a new REGION_SELECTION or raises the existing
 %      singleton*.
 %
-%      H = NEW_LABELING returns the handle to a new NEW_LABELING or the handle to
+%      H = REGION_SELECTION returns the handle to a new REGION_SELECTION or the handle to
 %      the existing singleton*.
 %
-%      NEW_LABELING('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in NEW_LABELING.M with the given input arguments.
+%      REGION_SELECTION('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in REGION_SELECTION.M with the given input arguments.
 %
-%      NEW_LABELING('Property','Value',...) creates a new NEW_LABELING or raises the
+%      REGION_SELECTION('Property','Value',...) creates a new REGION_SELECTION or raises the
 %      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before new_labeling_OpeningFcn gets called.  An
+%      applied to the GUI before region_selection_OpeningFcn gets called.  An
 %      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to new_labeling_OpeningFcn via varargin.
+%      stop.  All inputs are passed to region_selection_OpeningFcn via varargin.
 %
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help new_labeling
+% Edit the above text to modify the response to help region_selection
 
-% Last Modified by GUIDE v2.5 17-Feb-2017 18:11:06
+% Last Modified by GUIDE v2.5 19-Feb-2017 15:46:18
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
                    'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @new_labeling_OpeningFcn, ...
-                   'gui_OutputFcn',  @new_labeling_OutputFcn, ...
+                   'gui_OpeningFcn', @region_selection_OpeningFcn, ...
+                   'gui_OutputFcn',  @region_selection_OutputFcn, ...
                    'gui_LayoutFcn',  [] , ...
                    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
@@ -44,13 +44,13 @@ end
 % End initialization code - DO NOT EDIT
 
 
-% --- Executes just before new_labeling is made visible.
-function new_labeling_OpeningFcn(hObject, eventdata, handles, varargin)
+% --- Executes just before region_selection is made visible.
+function region_selection_OpeningFcn(hObject, eventdata, handles, varargin)
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to new_labeling (see VARARGIN)
+% varargin   command line arguments to region_selection (see VARARGIN)
 global img_file_path
 global labels
 global regions
@@ -69,7 +69,7 @@ regions = cell(0);
 % img_file_path = './data/BCN877_72h_x20bf_3.jpg'; %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Choose default command line output for new_labeling
+% Choose default command line output for region_selection
 handles.output = hObject;
 
 % Set image file path as the window title
@@ -87,12 +87,12 @@ imshow(myImage);
 % Update handles structure
 guidata(hObject, handles);
 
-% UIWAIT makes new_labeling wait for user response (see UIRESUME)
+% UIWAIT makes region_selection wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = new_labeling_OutputFcn(hObject, eventdata, handles) 
+function varargout = region_selection_OutputFcn(hObject, eventdata, handles) 
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -110,7 +110,7 @@ function figure1_CloseRequestFcn(hObject, eventdata, handles)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DEV OPTION - UNCOMMENT WHEN FINISHED!!!! %
 % Open main menu figure                    %
-main                                       %
+main_menu                                       %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Hint: delete(hObject) closes the figure
@@ -127,7 +127,7 @@ set(axesHandle, 'Units', 'Pixels');
 coordinates = get(axesHandle,'CurrentPoint');
 px_coordinates = floor(coordinates(1,1:2));
 
-uiwait(label_select)
+uiwait(label_selection)
 
 
 % --- Executes on button press in toggle_size.
@@ -242,7 +242,7 @@ while get(hObject,'Value')
     
     region_data = getPosition(regions{end,1});
     
-    % Launch label_select
+    % Launch label_selection
     RegionSelectCallback(handles.image_axes)
     
     if ~isempty(region_data)
@@ -321,7 +321,7 @@ while get(hObject,'Value')
     
     region_data = getPosition(regions{end,1});
     
-    % Launch label_select
+    % Launch label_selection
     RegionSelectCallback(handles.image_axes)
     
     if ~isempty(region_data)
@@ -374,7 +374,7 @@ while get(hObject,'Value')
     
     region_data = getPosition(regions{end,1});
     
-    % Launch label_select
+    % Launch label_selection
     RegionSelectCallback(handles.image_axes)
     
     if ~isempty(region_data)
@@ -426,7 +426,7 @@ while get(hObject,'Value')
     
     region_data = getPosition(regions{end,1});
     
-    % Launch label_select
+    % Launch label_selection
     RegionSelectCallback(handles.image_axes)
     
     if ~isempty(region_data)
