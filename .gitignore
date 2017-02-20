@@ -1,5 +1,5 @@
 # Ignore labels JSON files
-*.json
+*_labels.json
 ideas.yaml
 
 ### Windows template
