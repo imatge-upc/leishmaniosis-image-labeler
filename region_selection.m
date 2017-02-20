@@ -22,7 +22,7 @@ function varargout = region_selection(varargin)
 
 % Edit the above text to modify the response to help region_selection
 
-% Last Modified by GUIDE v2.5 19-Feb-2017 20:28:55
+% Last Modified by GUIDE v2.5 20-Feb-2017 10:35:34
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -56,20 +56,23 @@ global labels
 global regions
 global active_region_type
 global region_texts
+global parasite_types
 
 active_region_type = '';
 
-% Initialize labels as an empty cell array
+% Initialize labels and regions as empty cell arrays
 labels = cell(0);
-
-% Initialize regions as an empty cell array
 regions = cell(0);
 region_texts = cell(0);
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % DEV OPTION - COMMENT WHEN FINISHED!!!!         %
-% img_file_path = './data/BCN877_72h_x20bf_3.jpg'; %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Load parasite types
+config_values = loadjson('config.json');
+parasite_types = config_values.parasite_types;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DEV OPTION - COMMENT WHEN FINISHED!!!!         %
+img_file_path = './data/BCN877_72h_x20bf_3.jpg'; %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Choose default command line output for region_selection
 handles.output = hObject;
@@ -109,11 +112,11 @@ function figure1_CloseRequestFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% DEV OPTION - UNCOMMENT WHEN FINISHED!!!! %
-% Open main menu figure                    %
-main_menu                                  %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % DEV OPTION - UNCOMMENT WHEN FINISHED!!!! %
+% % Open main menu figure                    %
+% main_menu                                  %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Hint: delete(hObject) closes the figure
 delete(hObject);
@@ -176,12 +179,12 @@ try
     
     if get(hObject, 'Value') == 1
         % Hide labels
-        arrayfun(@(text) hide_text_callback(text), region_texts);
+        cellfun(@(text) hide_text_callback(text), region_texts);
         
         set(hObject, 'String', 'Show labels');
     else
         % Show labels
-        arrayfun(@(text) show_text_callback(text), region_texts);
+        cellfun(@(text) show_text_callback(text), region_texts);
         
         set(hObject, 'String', 'Hide labels');
     end
@@ -192,14 +195,14 @@ catch MException
 end
 
 function hide_text_callback(text)
-text{1}.Visible = 'off';
+text.Visible = 'off';
 
 function show_text_callback(text)
-text{1}.Visible = 'on';
+text.Visible = 'on';
 
-% --- Executes on button press in save_button.
-function save_button_Callback(hObject, eventdata, handles)
-% hObject    handle to save_button (see GCBO)
+% --- Executes on button press in save_labels.
+function save_labels_Callback(hObject, eventdata, handles)
+% hObject    handle to save_labels (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
@@ -216,10 +219,143 @@ img_name = regexprep(img_file_path,pattern,replacement);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DEV - Activate compact when finished!!                                   %
-savejson('', labels, 'FileName', [img_name,'_labels.json'], 'Compact', 1); %
+savejson('', labels, 'FileName', [img_name,'_labels.json'], 'Compact', 0); %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 helpdlg('Labels have been saved','Save success')
+
+
+% --- Executes on button press in load_data.
+function load_data_Callback(hObject, eventdata, handles)
+% hObject    handle to load_data (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global img_file_path
+global labels
+
+% Get image path with JSON extension
+pattern = '.jpg';
+replacement = '_labels.json';
+data_filepath = regexprep(img_file_path,pattern,replacement);
+
+labels = loadjson(data_filepath);
+
+% Show regions and labels
+cellfun(@(region) load_region(handles, region), labels);
+
+helpdlg('Labels have been loaded','Load success')
+
+% --- Executes on data load --- %
+function load_region(handles, region)
+global region_texts
+global parasite_types
+global regions
+
+region_data = region.Position;
+l = region.l;
+
+switch region.region_type
+    case 'rectangle'
+        fcn = makeConstrainToRectFcn( ...
+            'imrect', ...
+            handles.image_axes.XLim, ...
+            handles.image_axes.YLim ...
+            );
+        regions{l, 1} = imrect(handles.image_axes, region.Position);
+        
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % TODO Move to function
+        region_texts{l,1} = text(region_data(1)+(region_data(3)/2), region_data(2)+region_data(4),...
+            parasite_types{region.parasite_type},...
+            'HorizontalAlignment', 'center',...
+            'VerticalAlignment', 'top'...
+            );
+        
+        % Callback for updating rectangle info when it is moved
+        addNewPositionCallback(regions{l, 1},...
+            (@(p) rectangleEllipsePositionCallback(p,l,region_texts{l,1})) ...
+            );
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    case 'ellipse'
+        fcn = makeConstrainToRectFcn( ...
+            'imellipse', ...
+            handles.image_axes.XLim, ...
+            handles.image_axes.YLim ...
+            );
+        regions{l, 1} = imellipse(handles.image_axes, region.Position);
+        
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % TODO Move to function
+        region_texts{l,1} = text(region_data(1)+(region_data(3)/2), region_data(2)+region_data(4),...
+            parasite_types{region.parasite_type},...
+            'HorizontalAlignment', 'center',...
+            'VerticalAlignment', 'top'...
+            );
+        
+        % Callback for updating rectangle info when it is moved
+        addNewPositionCallback(regions{l, 1},...
+            (@(p) rectangleEllipsePositionCallback(p,l,region_texts{l,1})) ...
+            );
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    case 'polygon'
+        fcn = makeConstrainToRectFcn( ...
+            'impoly', ...
+            handles.image_axes.XLim, ...
+            handles.image_axes.YLim ...
+            );
+        regions{l, 1} = impoly(handles.image_axes, region.Position);
+        
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % TODO Move to function
+        max_h = max(region_data(:,1));
+        min_h = min(region_data(:,1));
+        text_v = max(region_data(:,2));
+        
+        region_texts{l,1} = text((min_h+max_h)/2, text_v,...
+            parasite_types{region.parasite_type},...
+            'HorizontalAlignment', 'center',...
+            'VerticalAlignment', 'top'...
+            );
+        
+        % Callback for updating region info when it is moved
+        addNewPositionCallback(regions{l, 1},...
+            (@(p) regionPositionCallback(p,l,region_texts{l,1})) ...
+            );
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    case 'freehand'
+        fcn = makeConstrainToRectFcn( ...
+            'imfreehand', ...
+            handles.image_axes.XLim, ...
+            handles.image_axes.YLim ...
+            );
+        regions{l, 1} = imfreehand(handles.image_axes, region.Position);
+        
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % TODO Move to function
+        max_h = max(region_data(:,1));
+        min_h = min(region_data(:,1));
+        text_v = max(region_data(:,2));
+        
+        region_texts{l,1} = text((min_h+max_h)/2, text_v,...
+            parasite_types{region.parasite_type},...
+            'HorizontalAlignment', 'center',...
+            'VerticalAlignment', 'top'...
+            );
+        
+        % Callback for updating region info when it is moved
+        addNewPositionCallback(regions{l, 1},...
+            (@(p) regionPositionCallback(p,l,region_texts{l,1})) ...
+            );
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    otherwise
+        errordlg('Invalid region type')
+end
+
+api = iptgetapi(regions{l, 1});
+api.setPositionConstraintFcn(fcn);
+
+api.setColor('green');
+
 
 % --- Executes on button press in set_square.
 function set_square_Callback(hObject, eventdata, handles)
@@ -313,20 +449,21 @@ function rectangleEllipsePositionCallback(region_data, l, text)
 
 global labels
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TODO Move to function
 % Update position of the color rectangle
 text.Position = [region_data(1)+(region_data(3)/2), region_data(2)+region_data(4)];
 
 % Update rectangle position in labels cell array
-labels{l}.x = region_data(1);
-labels{l}.y = region_data(2);
-labels{l}.width = region_data(3);
-labels{l}.height = region_data(4);
+labels{l}.Position = region_data;
 
 % --- Executes on when the user moves a non-rectangular region.
 function regionPositionCallback(region_data, l, text)
 
 global labels
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TODO Move to function
 max_h = max(region_data(:,1));
 min_h = min(region_data(:,1));
 text_v = max(region_data(:,2));
