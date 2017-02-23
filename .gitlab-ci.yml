@@ -9,7 +9,7 @@ pages:
 
   script:
   - npm install -g harp doctoc
-  - doctoc --gitlab ./*
+  - doctoc --gitlab --title '**Contents**' .
   - harp compile ./ public
   artifacts:
     paths:
