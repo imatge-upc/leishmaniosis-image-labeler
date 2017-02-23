@@ -8,7 +8,8 @@ pages:
     - node_modules
 
   script:
-  - npm install -g harp
+  - npm install -g harp doctoc
+  - doctoc --gitlab ./*
   - harp compile ./ public
   artifacts:
     paths:
