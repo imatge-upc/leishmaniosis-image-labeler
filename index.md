@@ -8,8 +8,8 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [GitLab CI](#gitlab-ci)
-- [Building locally](#building-locally)
+    - [Running the app](#running-the-app)
+- [Main menu](#main-menu)
 - [GitLab User or Group Pages](#gitlab-user-or-group-pages)
 - [Did you fork this project?](#did-you-fork-this-project)
 - [Troubleshooting](#troubleshooting)
@@ -24,7 +24,7 @@ The app is run my calling `main_menu` on MATLAB's command line.
 
 The app's main menu looks like this:
 
-![Main Menu](screenshots/main_menu.png)
+![Main Menu](screenshots/main_menu.svg)
 
 
 
