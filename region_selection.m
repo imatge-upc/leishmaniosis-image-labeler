@@ -57,6 +57,7 @@ global regions
 global active_region_type
 global region_texts
 global parasite_types
+global parasite_colours
 
 active_region_type = '';
 
@@ -68,11 +69,12 @@ region_texts = cell(0);
 % Load parasite types
 config_values = loadjson('config.json');
 parasite_types = config_values.parasite_types;
+parasite_colours = config_values.parasite_colours;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% DEV OPTION - COMMENT WHEN FINISHED!!!!         %
-img_file_path = './data/BCN877_72h_x20bf_3.jpg'; %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % DEV OPTION - COMMENT WHEN FINISHED!!!!         %
+% img_file_path = './data/BCN877_72h_x20bf_3.jpg'; %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Choose default command line output for region_selection
 handles.output = hObject;
@@ -112,11 +114,11 @@ function figure1_CloseRequestFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % DEV OPTION - UNCOMMENT WHEN FINISHED!!!! %
-% % Open main menu figure                    %
-% main_menu                                  %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DEV OPTION - UNCOMMENT WHEN FINISHED!!!! %
+% Open main menu figure                    %
+main_menu                                  %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Hint: delete(hObject) closes the figure
 delete(hObject);
@@ -219,7 +221,7 @@ img_name = regexprep(img_file_path,pattern,replacement);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DEV - Activate compact when finished!!                                   %
-savejson('', labels, 'FileName', [img_name,'_labels.json'], 'Compact', 0); %
+savejson('', labels, 'FileName', [img_name,'_labels.json'], 'Compact', 1); %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 helpdlg('Labels have been saved','Save success')
@@ -426,7 +428,7 @@ while get(hObject,'Value')
     
     if ~isempty(region_data)
         % Set region colour
-        api.setColor('green');
+        setRegionColour(api, labels{l}.parasite_type)
         
         region_texts{l,1} = text(region_data(1)+(region_data(3)/2), region_data(2)+region_data(4),...
             parasite_types{labels{l}.parasite_type},...
@@ -443,6 +445,12 @@ while get(hObject,'Value')
     % TODO Check that this is correct
     set(hObject, 'Interruptible', 'On')
 end
+
+function setRegionColour(region_api, parasite_type)
+    global parasite_colours
+    colour = parasite_colours{parasite_type};
+    
+    region_api.setColor(colour);
 
 % --- Executes on when the user moves a rectangle.
 function rectangleEllipsePositionCallback(region_data, l, text)
@@ -516,8 +524,8 @@ while get(hObject,'Value')
     RegionSelectCallback(handles.image_axes)
     
     if ~isempty(region_data)
-        % Set polygon colour
-        api.setColor('green');
+        % Set region colour
+        setRegionColour(api, labels{l}.parasite_type)
         
         region_texts{l,1} = text(region_data(1)+(region_data(3)/2), region_data(2)+region_data(4),...
             parasite_types{labels{l}.parasite_type},...
@@ -578,7 +586,7 @@ while get(hObject,'Value')
     
     if ~isempty(region_data)
         % Set polygon colour
-        api.setColor('green');
+        setRegionColour(api, labels{l}.parasite_type)
         
         max_h = max(region_data(:,1));
         min_h = min(region_data(:,1));
@@ -642,8 +650,8 @@ while get(hObject,'Value')
     RegionSelectCallback(handles.image_axes)
     
     if ~isempty(region_data)
-        % Set polygon colour
-        api.setColor('green');
+        % Set region colour
+        setRegionColour(api, labels{l}.parasite_type)
         
         max_h = max(region_data(:,1));
         min_h = min(region_data(:,1));
