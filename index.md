@@ -1,11 +1,6 @@
-![Build Status](https://gitlab.com/pages/harp/badges/master/build.svg)
+# TSC Image Labeling App: User documentation
 
----
-
-Example [Harp] website using GitLab Pages.
-
-Learn more about GitLab Pages at https://pages.gitlab.io and the official
-documentation http://doc.gitlab.com/ee/pages/README.html.
+![Build Status](https://gitlab.com/albertaparicio/tsc-leishmaniosis/badges/pages/build.svg)
 
 ---
 
@@ -21,40 +16,17 @@ documentation http://doc.gitlab.com/ee/pages/README.html.
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## GitLab CI
+### Running the app
 
-This project's static Pages are built by [GitLab CI][ci], following the steps
-defined in [`.gitlab-ci.yml`](.gitlab-ci.yml):
+The app is run my calling `main_menu` on MATLAB's command line.
 
-```
-image: node:4.2.2
+## Main menu
 
-pages:
-  cache:
-    paths:
-    - vendor
+The app's main menu looks like this:
 
-  script:
-  - npm install -g harp
-  - harp compile ./ public
-  artifacts:
-    paths:
-    - public
-  only:
-  - master
-```
+![Main Menu](screenshots/main_menu.png)
 
-## Building locally
 
-To work locally with this project, you'll have to follow the steps below:
-
-1. Fork, clone or download this project
-1. [Install][] Harp
-1. Generate the website: `harp compile ./ public`
-1. Preview your project: `harp server --port 9000`
-1. Add content
-
-Read more at harp's [documentation][].
 
 ## GitLab User or Group Pages
 
