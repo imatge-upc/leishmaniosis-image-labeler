@@ -4,30 +4,42 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Contents**
 
+- [Installation](#installation)
 - [Running the app](#running-the-app)
-- [Main menu](#main-menu)
-- [Region selection](#region-selection)
-    - [Available region types](#available-region-types)
-        - [Rectangle](#rectangle)
-        - [Ellipse](#ellipse)
-        - [Polygon](#polygon)
-        - [Freehand](#freehand)
-    - [Config buttons](#config-buttons)
-        - [Maximize/Restore](#maximizerestore)
-        - [Hide/Show labels](#hideshow-labels)
-        - [1:1 Ratio](#11-ratio)
-        - [Save](#save)
-        - [Load](#load)
+    - [Main menu](#main-menu)
+    - [Region selection](#region-selection)
+        - [Available region types](#available-region-types)
+            - [Rectangle](#rectangle)
+            - [Ellipse](#ellipse)
+            - [Polygon](#polygon)
+            - [Freehand](#freehand)
+        - [Config buttons](#config-buttons)
+            - [Maximize/Restore](#maximizerestore)
+            - [Hide/Show labels](#hideshow-labels)
+            - [1:1 Ratio](#11-ratio)
+            - [Save](#save)
+            - [Load](#load)
+    - [Label selection](#label-selection)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+<a name="installation"></a>
+## Installation
+
+To install the app, follow these instructions:
+
+1. Download the code from the repository:
+  - https://gitlab.com/albertaparicio/tsc-leishmaniosis/repository/archive.zip?ref=master
+2. Unzip the app's code from the .zip file
+3. Install the JSONlab library
+  - Inside MATLAB, double click the `lib/jsonlab-1.5.mltbx` file and click ***Install***
+4. Call `main_menu.m` on MATLAB's command line.
 
 <a name="running-the-app"></a>
 ## Running the app
 
-The app is run my calling `main_menu` on MATLAB's command line.
-
 <a name="main-menu"></a>
-## Main menu
+### Main menu
 
 The app's main menu looks like this:
 
@@ -63,7 +75,7 @@ When the **Open image** button is clicked, the main menu is closed and the
 region selection window opens.
 
 <a name="region-selection"></a>
-## Region selection
+### Region selection
 
 The buttons at the right of the window are used to choose the kind of region to
 be selected. The buttons at the left control some configuration aspects of the
@@ -74,13 +86,16 @@ app.
 The app displays a text below each region, showing the selected label.
 
 <a name="available-region-types"></a>
-### Available region types
+#### Available region types
 
 At the time of writing, the labeling app supports four region types:
 **Rectangles**, **Ellipses**, **Polygons** and **Freehand** regions.
 
+Each region is confirmed once it is closed and double-clicked. Once it is
+confirmed, the [Label Selection window](#label-selection)
+
 <a name="rectangle"></a>
-#### Rectangle
+##### Rectangle
 
 Freehand regions cannot be modified once they are closed.
 
@@ -94,7 +109,7 @@ only be resized by dragging its corners.
 ![region-selection](screenshots/rect_fix_aspect_ratio.png)
 
 <a name="ellipse"></a>
-#### Ellipse
+##### Ellipse
 
 Elliptical regions are selected by dragging the mouse pointer. They can be
 resized by dragging any of its sides or corners.
@@ -106,7 +121,7 @@ only be resized by dragging its corners.
 ![region-selection](screenshots/ellipse_fix_aspect_ratio.png)
 
 <a name="polygon"></a>
-#### Polygon
+##### Polygon
 
 Polygonal regions are selected by repeatedly clicking on the image. Each click
 inserts a new vertex to the polygon at the location of the mouse pointer.
@@ -125,7 +140,7 @@ desired point. The pointer will turn into a circle. Then, the point can be
 dragged around.
 
 <a name="freehand"></a>
-#### Freehand
+##### Freehand
 
 Freehand regions are selected by clicking and dragging the mouse pointer along
 the image until the left button of the mouse is released. The region is then set
@@ -136,7 +151,7 @@ Freehand regions cannot be modified once they are closed.
 ![region-selection](screenshots/freehand_region.png)
 
 <a name="config-buttons"></a>
-### Config buttons
+#### Config buttons
 
 <img align="left" alt=config_buttons src="screenshots/config_buttons.svg">
 <!--<div style="float: left">
@@ -144,78 +159,46 @@ Freehand regions cannot be modified once they are closed.
 </div>-->
 
 <a name="maximizerestore"></a>
-#### Maximize/Restore
+##### Maximize/Restore
 
 At the top left corner of the window there is a check box, labeled 'Maximize'.
 This check box allows the user to maximize the app's window. The box restores
 the window to its original size if it is clicked when the app is maximized.
 
 <a name="hideshow-labels"></a>
-#### Hide/Show labels
+##### Hide/Show labels
 
 Below the 'Maximize' check box, there is a toggle button labeled 'Hide Labels'.
 This toggle button hides/shows the labels shown below each region.
 
 <a name="11-ratio"></a>
-#### 1:1 Ratio
+##### 1:1 Ratio
 
 This button only works with rectangular and elliptical regions. This button sets
 the region's aspect ratio as 1:1 i.e. square or circle.
 
 <a name="save"></a>
-#### Save
+##### Save
 
 This button saves the currently selected regions and their labels to a JSON file.
 
 The JSON file is named like the image on which the labels were selected.
 
 <a name="load"></a>
-#### Load
+##### Load
 
 This button loads previously saved labels from a JSON file named like the image
 on which the labels are to be loaded.
 
-<!-- <a name="label-selection"></a>
-## Label selection -->
+<a name="label-selection"></a>
+### Label selection
 
-<!--## Template stuff
+This window appears when a region is confirmed. It allows the user to choose a label for a region and, if she so chooses, to write a comment for it.
 
-To use this project as your user/group website, you will need one additional
-step: just rename your project to `namespace.gitlab.io`, where `namespace` is
-your `username` or `groupname`. This can be done by navigating to your
-project's **Settings**.
-
-Read more about [user/group Pages][userpages] and [project Pages][projpages].
-
-## Did you fork this project?
-
-If you forked this project for your own use, please go to your project's
-**Settings** and remove the forking relationship, which won't be necessary
-unless you want to contribute back to the upstream project.
-
-## Troubleshooting
-
-1. CSS is missing! That means two things:
-
-    Either that you have wrongly set up the CSS URL in your templates, or
-    your static generator has a configuration option that needs to be explicitly
-    set in order to serve static assets under a relative URL.
-
-----
-
-Forked from @VeraKolotyuk
-
-[ci]: https://about.gitlab.com/gitlab-ci/
-[harp]: http://harpjs.com/
-[install]: http://harpjs.com/docs/quick-start
-[documentation]: http://harpjs.com/docs/
-[userpages]: http://doc.gitlab.com/ee/pages/README.html#user-or-group-pages
-[projpages]: http://doc.gitlab.com/ee/pages/README.html#project-pages
--->
-<a href="#" class="back-to-top">Back to Top</a>
+<!-- <a href="#" class="back-to-top">Back to Top</a> -->
 
 <!-- Code from http://html-tuts.com/back-to-top-button-jquery/ -->
-<script type="text/javascript">
+<!-- <script type="text/javascript">
     // create the back to top button
     $('body').prepend('<a href="#" class="back-to-top">Back to Top</a>');
 
@@ -235,4 +218,4 @@ Forked from @VeraKolotyuk
     	}, 700);
     	return false;
     });
-    </script>
+    </script> -->
