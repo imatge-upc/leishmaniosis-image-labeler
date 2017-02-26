@@ -1,5 +1,13 @@
 # TSC Labeling App User documentation
 
+<!-- TO-DO Breu explicació del que fa l'aplicatiu-->
+
+<!-- This app has been developed for the project **NOM_PROJECTE** from the Image
+Processing Group ([GPI]) at the Signal Theory and Communications
+Department ([TSC]) of Universitat Politècnica de Catalunya - BarcelonaTech
+([UPC]). It has been funded by the UPC's Centre for Development
+Cooperation ([CCD]). -->
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Contents**
@@ -20,6 +28,7 @@
             - [Save](#save)
             - [Load](#load)
     - [Label selection](#label-selection)
+- [Contact](#contact)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -28,12 +37,13 @@
 
 To install the app, follow these instructions:
 
-1. Download the code from the repository:
-  - https://gitlab.com/albertaparicio/tsc-leishmaniosis/repository/archive.zip?ref=master
+1. Download the code from the repository ([click here][src_down])
 2. Unzip the app's code from the .zip file
 3. Install the JSONlab library
-  - Inside MATLAB, double click the `lib/jsonlab-1.5.mltbx` file and click ***Install***
+  - Inside MATLAB, double-click the `lib/jsonlab-1.5.mltbx` file and click ***Install***
 4. Call `main_menu.m` on MATLAB's command line.
+
+The source code of this app can be downloaded from [this repository][projrepo].
 
 <a name="running-the-app"></a>
 ## Running the app
@@ -154,9 +164,6 @@ Freehand regions cannot be modified once they are closed.
 #### Config buttons
 
 <img align="left" alt=config_buttons src="screenshots/config_buttons.svg">
-<!--<div style="float: left">
-    ![config_buttons](screenshots/config_buttons.svg "Config buttons")
-</div>-->
 
 <a name="maximizerestore"></a>
 ##### Maximize/Restore
@@ -193,12 +200,37 @@ on which the labels are to be loaded.
 <a name="label-selection"></a>
 ### Label selection
 
-This window appears when a region is confirmed. It allows the user to choose a label for a region and, if she so chooses, to write a comment for it.
+This window appears when a region is confirmed. It allows the user to choose a
+label for a region and, if she so chooses, to write a comment for it. The pop-up
+menu at the top of the window allows the user to choose the label for the
+region. The 'Comments' box allows for up to 20 lines of text to be written.
 
-<!-- <a href="#" class="back-to-top">Back to Top</a> -->
+![Label selection](screenshots/label_selection.svg) ![Pop-up menu](screenshots/popup_menu.png) ![Comments box](screenshots/comments_box.png)
+
+**At the time of writing, the available labels cannot be adjusted by the user. In
+a future version, the user will be able to select them.**
+
+After the user clicks 'OK', the region is assigned the label and is displayed in
+a colour, with the label shown below it, like is shown in the image below:
+
+![region-selection](screenshots/multiple_regions.png)
+
+<a name="contact"></a>
+## Contact
+
+Bugs, missing features, improvements, etc. can be reported by submitting an
+Issue at the
+[project's repository][issues].
+
+---
+
+This webpage is hosted with [GitLab Pages]. This page has been built
+with [Harp][harp].
+
+<a href="#" class="back-to-top">Back to Top</a>
 
 <!-- Code from http://html-tuts.com/back-to-top-button-jquery/ -->
-<!-- <script type="text/javascript">
+<script type="text/javascript">
     // create the back to top button
     $('body').prepend('<a href="#" class="back-to-top">Back to Top</a>');
 
@@ -218,4 +250,14 @@ This window appears when a region is confirmed. It allows the user to choose a l
     	}, 700);
     	return false;
     });
-    </script> -->
+    </script>
+
+[src_down]: https://gitlab.com/albertaparicio/tsc-leishmaniosis/repository/archive.zip?ref=master
+[GPI]: https://imatge.upc.edu/web/
+[TSC]: http://www.tsc.upc.edu/en
+[UPC]: http://www.upc.edu/?set_language=en
+[CCD]: https://www.upc.edu/ccd/en
+[GitLab Pages]: https://pages.gitlab.io/
+[harp]: http://harpjs.com/
+[projrepo]: https://gitlab.com/albertaparicio/tsc-leishmaniosis/
+[issues]: https://gitlab.com/albertaparicio/tsc-leishmaniosis/issues
