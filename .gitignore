@@ -1,6 +1,8 @@
 # Ignore labels JSON files
 *_labels.json
 ideas.yaml
+/test_scripts/
+test.m
 
 ### Windows template
 # Windows image file caches
