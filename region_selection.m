@@ -71,10 +71,10 @@ config_values = loadjson('config.json');
 parasite_types = config_values.parasite_types;
 parasite_colours = config_values.parasite_colours;
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % DEV OPTION - COMMENT WHEN FINISHED!!!!         %
-% img_file_path = './data/BCN877_72h_x20bf_3.jpg'; %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DEV OPTION - COMMENT WHEN FINISHED!!!!         %
+img_file_path = './data/BCN877_72h_x20bf_3.jpg'; %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Choose default command line output for region_selection
 handles.output = hObject;
@@ -114,11 +114,11 @@ function figure1_CloseRequestFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% DEV OPTION - UNCOMMENT WHEN FINISHED!!!! %
-% Open main menu figure                    %
-main_menu                                  %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % DEV OPTION - UNCOMMENT WHEN FINISHED!!!! %
+% % Open main menu figure                    %
+% main_menu                                  %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Hint: delete(hObject) closes the figure
 delete(hObject);
@@ -387,70 +387,11 @@ catch MException
     helpdlg(MException.message,MException.identifier)
 end
 
-% --- Executes on button press in rectangle_region.
-function rectangle_region_Callback(hObject, eventdata, handles)
-% hObject    handle to rectangle_region (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of rectangle_region
-global region_data
-global regions
-global active_region_type
-global labels
-global parasite_types
-global region_texts
-
-active_region_type = 'rectangle';
-
-fcn = makeConstrainToRectFcn( ...
-    'imrect', ...
-    handles.image_axes.XLim, ...
-    handles.image_axes.YLim ...
-    );
-
-while get(hObject,'Value')
-    % TODO Check that this is correct
-    set(hObject, 'Interruptible', 'Off')
-    
-    l = size(regions,1) + 1;
-    regions{l, 1} = imrect;
-    
-    api = iptgetapi(regions{end,1});
-    api.setPositionConstraintFcn(fcn);
-    
-    wait(regions{end,1});
-    
-    region_data = getPosition(regions{end,1});
-    
-    % Launch label_selection
-    RegionSelectCallback(handles.image_axes)
-    
-    if ~isempty(region_data)
-        % Set region colour
-        setRegionColour(api, labels{l}.parasite_type)
-        
-        region_texts{l,1} = text(region_data(1)+(region_data(3)/2), region_data(2)+region_data(4),...
-            parasite_types{labels{l}.parasite_type},...
-            'HorizontalAlignment', 'center',...
-            'VerticalAlignment', 'top'...
-            );
-        
-        % Callback for updating rectangle info when it is moved
-        addNewPositionCallback(regions{end, 1},...
-            (@(p) rectangleEllipsePositionCallback(p,l,region_texts{l,1})) ...
-            );
-    end
-    
-    % TODO Check that this is correct
-    set(hObject, 'Interruptible', 'On')
-end
-
 function setRegionColour(region_api, parasite_type)
-    global parasite_colours
-    colour = parasite_colours{parasite_type};
-    
-    region_api.setColor(colour);
+global parasite_colours
+colour = parasite_colours{parasite_type};
+
+region_api.setColor(colour);
 
 % --- Executes on when the user moves a rectangle.
 function rectangleEllipsePositionCallback(region_data, l, text)
@@ -481,6 +422,91 @@ text.Position = [(min_h+max_h)/2, text_v];
 % Update region position in labels cell array
 labels{l}.Position = region_data;
 
+% --- Executes on button press in rectangle_region.
+function rectangle_region_Callback(hObject, eventdata, handles)
+% hObject    handle to rectangle_region (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of rectangle_region
+if get(hObject, 'Value') == 0
+    import java.awt.Robot
+    import java.awt.event.*
+    keys = Robot;
+    keys.setAutoDelay(100)
+    keys.keyPress(java.awt.event.KeyEvent.VK_ESCAPE )
+    keys.keyRelease(java.awt.event.KeyEvent.VK_ESCAPE )
+    keys.waitForIdle
+end
+
+global region_data
+global regions
+global active_region_type
+global labels
+global parasite_types
+global region_texts
+
+active_region_type = 'rectangle';
+
+fcn = makeConstrainToRectFcn( ...
+    'imrect', ...
+    handles.image_axes.XLim, ...
+    handles.image_axes.YLim ...
+    );
+
+fields = fieldnames(handles);
+region_names = fields(~cellfun(@isempty,strfind(fields, '_region')));
+to_disable = region_names(~strcmp(region_names,[active_region_type,'_region']));
+
+for idx = 1:numel(to_disable)
+    set(handles.(to_disable{idx}),'Enable','off')
+end
+
+while get(hObject,'Value')
+    % TODO Check that this is correct
+    %     set(hObject, 'Interruptible', 'Off')
+    
+    l = size(regions,1) + 1;
+    h = imrect;
+    
+    if numel(h) == 1
+        regions{l, 1} = h;
+        
+        api = iptgetapi(regions{end,1});
+        api.setPositionConstraintFcn(fcn);
+        
+        wait(regions{end,1});
+        
+        region_data = getPosition(regions{end,1});
+        
+        % Launch label_selection
+        RegionSelectCallback(handles.image_axes)
+        
+        if ~isempty(region_data)
+            % Set region colour
+            setRegionColour(api, labels{l}.parasite_type)
+            
+            region_texts{l,1} = text(region_data(1)+(region_data(3)/2), region_data(2)+region_data(4),...
+                parasite_types{labels{l}.parasite_type},...
+                'HorizontalAlignment', 'center',...
+                'VerticalAlignment', 'top'...
+                );
+            
+            % Callback for updating rectangle info when it is moved
+            addNewPositionCallback(regions{end, 1},...
+                (@(p) rectangleEllipsePositionCallback(p,l,region_texts{l,1})) ...
+                );
+        end
+        
+        % TODO Check that this is correct
+        %     set(hObject, 'Interruptible', 'On')
+    end
+end
+
+for idx = 1:numel(to_disable)
+    set(handles.(to_disable{idx}),'Enable','on')
+end
+
 
 % --- Executes on button press in ellipse_region.
 function ellipse_region_Callback(hObject, eventdata, handles)
@@ -489,6 +515,15 @@ function ellipse_region_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of elliptical_region
+if get(hObject, 'Value') == 0
+    import java.awt.Robot
+    import java.awt.event.*
+    keys = Robot;
+    keys.setAutoDelay(100)
+    keys.keyPress(java.awt.event.KeyEvent.VK_ESCAPE )
+    keys.keyRelease(java.awt.event.KeyEvent.VK_ESCAPE )
+    keys.waitForIdle
+end
 
 global region_data
 global regions
@@ -505,42 +540,58 @@ fcn = makeConstrainToRectFcn( ...
     handles.image_axes.YLim ...
     );
 
+fields = fieldnames(handles);
+region_names = fields(~cellfun(@isempty,strfind(fields, '_region')));
+to_disable = region_names(~strcmp(region_names,[active_region_type,'_region']));
+
+for idx = 1:numel(to_disable)
+    set(handles.(to_disable{idx}),'Enable','off')
+end
+
 while get(hObject,'Value')
     % TODO Check that this is correct
     set(hObject, 'Interruptible', 'Off')
     %     'PositionConstraintFcn'
     l = size(regions,1) + 1;
-    regions{l, 1} = imellipse;
+    h = imellipse;
     
-    api = iptgetapi(regions{end,1});
-    api.setResizable(true);
-    api.setPositionConstraintFcn(fcn);
-    
-    wait(regions{end,1});
-    
-    region_data = getPosition(regions{end,1});
-    
-    % Launch label_selection
-    RegionSelectCallback(handles.image_axes)
-    
-    if ~isempty(region_data)
-        % Set region colour
-        setRegionColour(api, labels{l}.parasite_type)
+    if numel(h) == 1
+        regions{l, 1} = h;
         
-        region_texts{l,1} = text(region_data(1)+(region_data(3)/2), region_data(2)+region_data(4),...
-            parasite_types{labels{l}.parasite_type},...
-            'HorizontalAlignment', 'center',...
-            'VerticalAlignment', 'top'...
-            );
+        api = iptgetapi(regions{end,1});
+        api.setResizable(true);
+        api.setPositionConstraintFcn(fcn);
         
-        % Callback for updating region info when it is moved
-        addNewPositionCallback(regions{end, 1},...
-            (@(p) rectangleEllipsePositionCallback(p,l,region_texts{l,1})) ...
-            );
+        wait(regions{end,1});
+        
+        region_data = getPosition(regions{end,1});
+        
+        % Launch label_selection
+        RegionSelectCallback(handles.image_axes)
+        
+        if ~isempty(region_data)
+            % Set region colour
+            setRegionColour(api, labels{l}.parasite_type)
+            
+            region_texts{l,1} = text(region_data(1)+(region_data(3)/2), region_data(2)+region_data(4),...
+                parasite_types{labels{l}.parasite_type},...
+                'HorizontalAlignment', 'center',...
+                'VerticalAlignment', 'top'...
+                );
+            
+            % Callback for updating region info when it is moved
+            addNewPositionCallback(regions{end, 1},...
+                (@(p) rectangleEllipsePositionCallback(p,l,region_texts{l,1})) ...
+                );
+        end
+        
+        % TODO Check that this is correct
+        set(hObject, 'Interruptible', 'On')
     end
-    
-    % TODO Check that this is correct
-    set(hObject, 'Interruptible', 'On')
+end
+
+for idx = 1:numel(to_disable)
+    set(handles.(to_disable{idx}),'Enable','on')
 end
 
 
@@ -551,6 +602,15 @@ function polygon_region_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of toggle_polygon
+if get(hObject, 'Value') == 0
+    import java.awt.Robot
+    import java.awt.event.*
+    keys = Robot;
+    keys.setAutoDelay(100)
+    keys.keyPress(java.awt.event.KeyEvent.VK_ESCAPE )
+    keys.keyRelease(java.awt.event.KeyEvent.VK_ESCAPE )
+    keys.waitForIdle
+end
 
 global region_data
 global regions
@@ -567,45 +627,61 @@ fcn = makeConstrainToRectFcn( ...
     handles.image_axes.YLim ...
     );
 
+fields = fieldnames(handles);
+region_names = fields(~cellfun(@isempty,strfind(fields, '_region')));
+to_disable = region_names(~strcmp(region_names,[active_region_type,'_region']));
+
+for idx = 1:numel(to_disable)
+    set(handles.(to_disable{idx}),'Enable','off')
+end
+
 while get(hObject,'Value')
     % TODO Check that this is correct
     set(hObject, 'Interruptible', 'Off')
     
     l = size(regions,1) + 1;
-    regions{l, 1} = impoly('Closed',true);
+    h = impoly('Closed',true);
     
-    api = iptgetapi(regions{end,1});
-    api.setPositionConstraintFcn(fcn);
-    
-    wait(regions{end,1});
-    
-    region_data = getPosition(regions{end,1});
-    
-    % Launch label_selection
-    RegionSelectCallback(handles.image_axes)
-    
-    if ~isempty(region_data)
-        % Set polygon colour
-        setRegionColour(api, labels{l}.parasite_type)
+    if numel(h) == 1
+        regions{l, 1} = h;
         
-        max_h = max(region_data(:,1));
-        min_h = min(region_data(:,1));
-        text_v = max(region_data(:,2));
+        api = iptgetapi(regions{end,1});
+        api.setPositionConstraintFcn(fcn);
         
-        region_texts{l,1} = text((min_h+max_h)/2, text_v,...
-            parasite_types{labels{l}.parasite_type},...
-            'HorizontalAlignment', 'center',...
-            'VerticalAlignment', 'top'...
-            );
+        wait(regions{end,1});
         
-        % Callback for updating region info when it is moved
-        addNewPositionCallback(regions{end, 1},...
-            (@(p) regionPositionCallback(p,l,region_texts{l,1})) ...
-            );
+        region_data = getPosition(regions{end,1});
+        
+        % Launch label_selection
+        RegionSelectCallback(handles.image_axes)
+        
+        if ~isempty(region_data)
+            % Set polygon colour
+            setRegionColour(api, labels{l}.parasite_type)
+            
+            max_h = max(region_data(:,1));
+            min_h = min(region_data(:,1));
+            text_v = max(region_data(:,2));
+            
+            region_texts{l,1} = text((min_h+max_h)/2, text_v,...
+                parasite_types{labels{l}.parasite_type},...
+                'HorizontalAlignment', 'center',...
+                'VerticalAlignment', 'top'...
+                );
+            
+            % Callback for updating region info when it is moved
+            addNewPositionCallback(regions{end, 1},...
+                (@(p) regionPositionCallback(p,l,region_texts{l,1})) ...
+                );
+        end
+        
+        % TODO Check that this is correct
+        set(hObject, 'Interruptible', 'On')
     end
-    
-    % TODO Check that this is correct
-    set(hObject, 'Interruptible', 'On')
+end
+
+for idx = 1:numel(to_disable)
+    set(handles.(to_disable{idx}),'Enable','on')
 end
 
 
@@ -616,6 +692,15 @@ function freehand_region_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of freehand_region
+if get(hObject, 'Value') == 0
+    import java.awt.Robot
+    import java.awt.event.*
+    keys = Robot;
+    keys.setAutoDelay(100)
+    keys.keyPress(java.awt.event.KeyEvent.VK_ESCAPE )
+    keys.keyRelease(java.awt.event.KeyEvent.VK_ESCAPE )
+    keys.waitForIdle
+end
 
 global region_data
 global regions
@@ -632,43 +717,59 @@ fcn = makeConstrainToRectFcn( ...
     handles.image_axes.YLim ...
     );
 
+fields = fieldnames(handles);
+region_names = fields(~cellfun(@isempty,strfind(fields, '_region')));
+to_disable = region_names(~strcmp(region_names,[active_region_type,'_region']));
+
+for idx = 1:numel(to_disable)
+    set(handles.(to_disable{idx}),'Enable','off')
+end
+
 while get(hObject,'Value')
     % TODO Check that this is correct
     set(hObject, 'Interruptible', 'Off')
     
     l = size(regions,1) + 1;
-    regions{l, 1} = imfreehand('Closed',true);
+    h = imfreehand('Closed',true);
     
-    api = iptgetapi(regions{end,1});
-    api.setPositionConstraintFcn(fcn);
-    
-    wait(regions{end,1});
-    
-    region_data = getPosition(regions{end,1});
-    
-    % Launch label_selection
-    RegionSelectCallback(handles.image_axes)
-    
-    if ~isempty(region_data)
-        % Set region colour
-        setRegionColour(api, labels{l}.parasite_type)
+    if numel(h) == 1
+        regions{l, 1} = h;
         
-        max_h = max(region_data(:,1));
-        min_h = min(region_data(:,1));
-        text_v = max(region_data(:,2));
+        api = iptgetapi(regions{end,1});
+        api.setPositionConstraintFcn(fcn);
         
-        region_texts{l,1} = text((min_h+max_h)/2, text_v,...
-            parasite_types{labels{l}.parasite_type},...
-            'HorizontalAlignment', 'center',...
-            'VerticalAlignment', 'top'...
-            );
+        wait(regions{end,1});
         
-        % Callback for updating region info when it is moved
-        addNewPositionCallback(regions{end, 1},...
-            (@(p) regionPositionCallback(p,l,region_texts{l,1})) ...
-            );
+        region_data = getPosition(regions{end,1});
+        
+        % Launch label_selection
+        RegionSelectCallback(handles.image_axes)
+        
+        if ~isempty(region_data)
+            % Set region colour
+            setRegionColour(api, labels{l}.parasite_type)
+            
+            max_h = max(region_data(:,1));
+            min_h = min(region_data(:,1));
+            text_v = max(region_data(:,2));
+            
+            region_texts{l,1} = text((min_h+max_h)/2, text_v,...
+                parasite_types{labels{l}.parasite_type},...
+                'HorizontalAlignment', 'center',...
+                'VerticalAlignment', 'top'...
+                );
+            
+            % Callback for updating region info when it is moved
+            addNewPositionCallback(regions{end, 1},...
+                (@(p) regionPositionCallback(p,l,region_texts{l,1})) ...
+                );
+        end
+        
+        % TODO Check that this is correct
+        set(hObject, 'Interruptible', 'On')
     end
-    
-    % TODO Check that this is correct
-    set(hObject, 'Interruptible', 'On')
+end
+
+for idx = 1:numel(to_disable)
+    set(handles.(to_disable{idx}),'Enable','on')
 end
