@@ -71,10 +71,10 @@ config_values = loadjson('config.json');
 parasite_types = config_values.parasite_types;
 parasite_colours = config_values.parasite_colours;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% DEV OPTION - COMMENT WHEN FINISHED!!!!         %
-img_file_path = './data/BCN877_72h_x20bf_3.jpg'; %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % DEV OPTION - COMMENT WHEN FINISHED!!!!         %
+% img_file_path = './data/BCN877_72h_x20bf_3.jpg'; %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Choose default command line output for region_selection
 handles.output = hObject;
@@ -114,11 +114,11 @@ function figure1_CloseRequestFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % DEV OPTION - UNCOMMENT WHEN FINISHED!!!! %
-% % Open main menu figure                    %
-% main_menu                                  %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DEV OPTION - UNCOMMENT WHEN FINISHED!!!! %
+% Open main menu figure                    %
+main_menu                                  %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Hint: delete(hObject) closes the figure
 delete(hObject);
@@ -212,17 +212,17 @@ global labels
 global img_file_path
 
 % Get image path without extension
-pattern = '.jpg';
-replacement = '';
+pattern = '.jpg$';
+replacement = '.json';
 img_name = regexprep(img_file_path,pattern,replacement);
 
 % TODO Try saving in UBJSON format
 % Save labels to JSON file
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% DEV - Activate compact when finished!!                                   %
-savejson('', labels, 'FileName', [img_name,'_labels.json'], 'Compact', 1); %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DEV - Activate compact when finished!!                  %
+savejson('', labels, 'FileName', img_name, 'Compact', 1); %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 helpdlg('Labels have been saved','Save success')
 
@@ -236,8 +236,8 @@ global img_file_path
 global labels
 
 % Get image path with JSON extension
-pattern = '.jpg';
-replacement = '_labels.json';
+pattern = '.jpg$';
+replacement = '.json';
 data_filepath = regexprep(img_file_path,pattern,replacement);
 
 labels = loadjson(data_filepath);
