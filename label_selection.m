@@ -51,6 +51,9 @@ function label_selection_OpeningFcn(hObject, eventdata, handles, varargin)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to label_selection (see VARARGIN)
+global did_select_label
+
+did_select_label = false;
 
 % Get current pointer location
 pointer_pos(1,1:2)=get(0,'Pointerlocation');
@@ -115,32 +118,26 @@ function ok_button_Callback(hObject, eventdata, handles)
 global labels
 global region_data
 global active_region_type
+global did_select_label
+
+did_select_label = true;
 
 % Save label as the pop-up menu value
 if get(handles.parasite_types, 'Value') <= length(get(handles.parasite_types, 'String'))
     % Parasite type selected -> add data to labels cell array
     switch active_region_type
-%         case {'rectangle', 'ellipse'}
-%             labels{length(labels) + 1} = struct(...
-%             'x', region_data(1), ...
-%             'y', region_data(2), ...
-%             'width', region_data(3), ...
-%             'height', region_data(4), ...
-%             'parasite_type', get(handles.parasite_types, 'Value'), ...
-%             'comments', get(handles.comments_textbox, 'String') ...
-%             );
         case {'rectangle', 'ellipse','polygon','freehand'}
             labels{length(labels) + 1} = struct(...
-            'region_type', active_region_type, ...
-            'Position', region_data, ...
-            'parasite_type', get(handles.parasite_types, 'Value'), ...
-            'comments', get(handles.comments_textbox, 'String'),...
-            'l', length(labels) + 1 ...
-            );
+                'region_type', active_region_type, ...
+                'Position', region_data, ...
+                'parasite_type', get(handles.parasite_types, 'Value'), ...
+                'comments', get(handles.comments_textbox, 'String'),...
+                'l', length(labels) + 1 ...
+                );
         case ''
-            errordlg('Error: No polygon type is selected', 'No polygon type')
+            errordlg('Error: No region type is selected', 'No region type')
         otherwise
-            errordlg('Error: Invalid polygon type', 'Invalid polygon type')
+            errordlg('Error: Invalid region type', 'Invalid region type')
     end
 end
 
@@ -154,6 +151,9 @@ function cancel_button_Callback(hObject, eventdata, handles)
 % hObject    handle to cancel_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+global did_select_label
+
+did_select_label = false;
 
 % Return to previous window
 uiresume

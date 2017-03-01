@@ -148,7 +148,8 @@ set(get(hObject, 'Parent'),'Units', 'normalized')
 
 if isequal(get(get(hObject, 'Parent'), 'outerposition'), [0 0 1 1])
     % The window is maximized -> unmaximize
-    set(get(hObject, 'Parent'),'Units', 'normalized', 'outerposition', handles.original_size);
+    set(get(hObject, 'Parent'),'Units', 'normalized', ...
+        'outerposition', handles.original_size);
     
     set(handles.image_axes, 'Units', 'normalized', ...
         'outerposition', [-0.0986   -0.0234    1.1546    1.0061]);
@@ -221,7 +222,7 @@ img_name = regexprep(img_file_path,pattern,replacement);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DEV - Activate compact when finished!!                  %
-savejson('', labels, 'FileName', img_name, 'Compact', 1); %
+savejson('', labels, 'FileName', img_name, 'Compact', 0); %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 helpdlg('Labels have been saved','Save success')
@@ -267,7 +268,8 @@ switch region.region_type
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % TODO Move to function
-        region_texts{l,1} = text(region_data(1)+(region_data(3)/2), region_data(2)+region_data(4),...
+        region_texts{l,1} = text(region_data(1)+(region_data(3)/2),...
+            region_data(2)+region_data(4),...
             parasite_types{region.parasite_type},...
             'HorizontalAlignment', 'center',...
             'VerticalAlignment', 'top'...
@@ -288,7 +290,8 @@ switch region.region_type
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % TODO Move to function
-        region_texts{l,1} = text(region_data(1)+(region_data(3)/2), region_data(2)+region_data(4),...
+        region_texts{l,1} = text(region_data(1)+(region_data(3)/2),...
+            region_data(2)+region_data(4),...
             parasite_types{region.parasite_type},...
             'HorizontalAlignment', 'center',...
             'VerticalAlignment', 'top'...
@@ -402,7 +405,8 @@ global labels
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TODO Move to function
 % Update position of the color rectangle
-text.Position = [region_data(1)+(region_data(3)/2), region_data(2)+region_data(4)];
+text.Position = [region_data(1)+(region_data(3)/2), ...
+    region_data(2)+region_data(4)];
 
 % Update rectangle position in labels cell array
 labels{l}.Position = region_data;
@@ -445,12 +449,8 @@ if get(hObject, 'Value') == 0
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
 
-global region_data
 global regions
 global active_region_type
-global labels
-global parasite_types
-global region_texts
 
 active_region_type = 'rectangle';
 
@@ -474,41 +474,14 @@ for idx = 1:numel(to_disable)
 end
 
 while get(hObject,'Value')
-    l = size(regions,1) + 1;
+    l = numel(regions) + 1;
     h = imrect;
     
     if numel(h) == 1
         api = iptgetapi(h);
         api.setPositionConstraintFcn(fcn);
         
-        w = wait(h);
-        
-        if numel(w) > 0
-            regions{l, 1} = h;
-            
-            region_data = getPosition(regions{end,1});
-            
-            % Launch label_selection
-            RegionSelectCallback(handles.image_axes)
-            
-            if ~isempty(region_data)
-                % Set region colour
-                setRegionColour(api, labels{l}.parasite_type)
-                
-                region_texts{l,1} = text(region_data(1)+(region_data(3)/2), region_data(2)+region_data(4),...
-                    parasite_types{labels{l}.parasite_type},...
-                    'HorizontalAlignment', 'center',...
-                    'VerticalAlignment', 'top'...
-                    );
-                
-                % Callback for updating rectangle info when it is moved
-                addNewPositionCallback(regions{end, 1},...
-                    (@(p) rectangleEllipsePositionCallback(p,l,region_texts{l,1})) ...
-                    );
-            end
-        else
-            delete(h)
-        end
+        recursiveRegionConfirm(handles, active_region_type, h, api, l)
     end
 end
 
@@ -534,12 +507,8 @@ if get(hObject, 'Value') == 0
     keys.waitForIdle
 end
 
-global region_data
 global regions
 global active_region_type
-global parasite_types
-global labels
-global region_texts
 
 active_region_type = 'ellipse';
 
@@ -558,7 +527,7 @@ for idx = 1:numel(to_disable)
 end
 
 while get(hObject,'Value')
-    l = size(regions,1) + 1;
+    l = numel(regions) + 1;
     h = imellipse;
     
     if numel(h) == 1
@@ -566,34 +535,7 @@ while get(hObject,'Value')
         api.setResizable(true);
         api.setPositionConstraintFcn(fcn);
         
-        w = wait(h);
-        
-        if numel(w) > 0
-            regions{l, 1} = h;
-            
-            region_data = getPosition(regions{end,1});
-            
-            % Launch label_selection
-            RegionSelectCallback(handles.image_axes)
-            
-            if ~isempty(region_data)
-                % Set region colour
-                setRegionColour(api, labels{l}.parasite_type)
-                
-                region_texts{l,1} = text(region_data(1)+(region_data(3)/2), region_data(2)+region_data(4),...
-                    parasite_types{labels{l}.parasite_type},...
-                    'HorizontalAlignment', 'center',...
-                    'VerticalAlignment', 'top'...
-                    );
-                
-                % Callback for updating region info when it is moved
-                addNewPositionCallback(regions{end, 1},...
-                    (@(p) rectangleEllipsePositionCallback(p,l,region_texts{l,1})) ...
-                    );
-            end
-        else
-            delete(h)
-        end
+        recursiveRegionConfirm(handles, active_region_type, h, api, l)
     end
 end
 
@@ -619,12 +561,8 @@ if get(hObject, 'Value') == 0
     keys.waitForIdle
 end
 
-global region_data
 global regions
 global active_region_type
-global labels
-global parasite_types
-global region_texts
 
 active_region_type = 'polygon';
 
@@ -643,45 +581,14 @@ for idx = 1:numel(to_disable)
 end
 
 while get(hObject,'Value')
-    l = size(regions,1) + 1;
+    l = numel(regions) + 1;
     h = impoly('Closed',true);
     
     if numel(h) == 1
         api = iptgetapi(h);
         api.setPositionConstraintFcn(fcn);
         
-        w = wait(h);
-        
-        if numel(w) > 0
-            regions{l, 1} = h;
-            
-            region_data = getPosition(regions{end,1});
-            
-            % Launch label_selection
-            RegionSelectCallback(handles.image_axes)
-            
-            if ~isempty(region_data)
-                % Set polygon colour
-                setRegionColour(api, labels{l}.parasite_type)
-                
-                max_h = max(region_data(:,1));
-                min_h = min(region_data(:,1));
-                text_v = max(region_data(:,2));
-                
-                region_texts{l,1} = text((min_h+max_h)/2, text_v,...
-                    parasite_types{labels{l}.parasite_type},...
-                    'HorizontalAlignment', 'center',...
-                    'VerticalAlignment', 'top'...
-                    );
-                
-                % Callback for updating region info when it is moved
-                addNewPositionCallback(regions{end, 1},...
-                    (@(p) regionPositionCallback(p,l,region_texts{l,1})) ...
-                    );
-            end
-        else
-            delete(h)
-        end
+        recursiveRegionConfirm(handles, active_region_type, h, api, l)
     end
 end
 
@@ -707,12 +614,8 @@ if get(hObject, 'Value') == 0
     keys.waitForIdle
 end
 
-global region_data
 global regions
 global active_region_type
-global labels
-global parasite_types
-global region_texts
 
 active_region_type = 'freehand';
 
@@ -730,28 +633,59 @@ for idx = 1:numel(to_disable)
     set(handles.(to_disable{idx}),'Enable','off')
 end
 
-while get(hObject,'Value')    
-    l = size(regions,1) + 1;
+while get(hObject,'Value')
+    l = numel(regions) + 1;
     h = imfreehand('Closed',true);
     
     if numel(h) == 1
         api = iptgetapi(h);
         api.setPositionConstraintFcn(fcn);
         
-        w = wait(h);
+        recursiveRegionConfirm(handles, active_region_type, h, api, l)
+    end
+end
+
+for idx = 1:numel(to_disable)
+    set(handles.(to_disable{idx}),'Enable','on')
+end
+
+function recursiveRegionConfirm(handles, region_type, h, api, l)
+global region_data
+global regions
+global labels
+global parasite_types
+global region_texts
+global did_select_label
+
+w = wait(h);
+
+if numel(w) > 0
+    regions{l, 1} = h;
+    
+    region_data = getPosition(regions{end,1});
+    
+    % Launch label_selection
+    RegionSelectCallback(handles.image_axes)
+    
+    if did_select_label
+        % Set region colour
+        setRegionColour(api, labels{l}.parasite_type)
         
-        if numel(w) > 0
-            regions{l, 1} = h;
-            
-            region_data = getPosition(regions{end,1});
-            
-            % Launch label_selection
-            RegionSelectCallback(handles.image_axes)
-            
-            if ~isempty(region_data)
-                % Set region colour
-                setRegionColour(api, labels{l}.parasite_type)
+        switch region_type
+            case {'rectangle', 'ellipse'}
+                region_texts{l,1} = text(region_data(1)+(region_data(3)/2),...
+                    region_data(2)+region_data(4),...
+                    parasite_types{labels{l}.parasite_type},...
+                    'HorizontalAlignment', 'center',...
+                    'VerticalAlignment', 'top'...
+                    );
                 
+                % Callback for updating rectangle info when it is moved
+                addNewPositionCallback(regions{end, 1},...
+                    (@(p) rectangleEllipsePositionCallback(p,l,...
+                    region_texts{l,1})) ...
+                    );
+            case{'polygon', 'freehand'}
                 max_h = max(region_data(:,1));
                 min_h = min(region_data(:,1));
                 text_v = max(region_data(:,2));
@@ -766,13 +700,16 @@ while get(hObject,'Value')
                 addNewPositionCallback(regions{end, 1},...
                     (@(p) regionPositionCallback(p,l,region_texts{l,1})) ...
                     );
-            end
-        else
-            delete(h)
+            otherwise
+                errordlg('Error: Invalid region type', 'Invalid region type')
         end
+    else
+        % Call recursiveRegionConfirm again to let user re-confirm the region
+        recursiveRegionConfirm(handles, region_type, h, api, l)
     end
-end
-
-for idx = 1:numel(to_disable)
-    set(handles.(to_disable{idx}),'Enable','on')
+else
+    delete(h)
+    
+    % Delete the region because it is not wanted by the user
+    regions = regions(1:end-1);
 end
