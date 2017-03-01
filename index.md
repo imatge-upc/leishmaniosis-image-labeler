@@ -240,29 +240,29 @@ Issue at the
 This webpage is hosted with [GitLab Pages]. This page has been built
 with [Harp][harp].
 
+Code of the floating 'Back to top' button based on  [this tutorial](http://html-tuts.com/back-to-top-button-jquery/).
+
 <a href="#" class="back-to-top">Back to Top</a>
 
-<!-- Code from http://html-tuts.com/back-to-top-button-jquery/ -->
+<!-- https://www.gnu.org/software/librejs/manual/html_node/Free-Licenses-Detection.html -->
 <script type="text/javascript">
-    // create the back to top button
-    $('body').prepend('<a href="#" class="back-to-top">Back to Top</a>');
-
-    var amountScrolled = 300;
-
+// @license magnet:?xt=urn:btih:8e4f440f4c65981c5bf93c76d35135ba5064d8b7&dn=apache-2.0.txt Apache-2.0
+// Code inspired by http://html-tuts.com/back-to-top-button-jquery/
     $(window).scroll(function() {
-    	if ( $(window).scrollTop() > amountScrolled ) {
-    		$('a.back-to-top').fadeIn('slow');
+    	if ( $(window).scrollTop() > $(window).height() ) {
+    		$('a.back-to-top').fadeIn('fast');
     	} else {
-    		$('a.back-to-top').fadeOut('slow');
+    		$('a.back-to-top').fadeOut('fast');
     	}
     });
 
-    $('a.back-to-top, a.simple-back-to-top').click(function() {
-    	$('html, body').animate({
+    $('a.back-to-top').click(function() {
+    	$('body').animate({
     		scrollTop: 0
-    	}, 700);
+    	}, 800);
     	return false;
     });
+// @license-end
     </script>
 
 [src_down]: https://gitlab.com/albertaparicio/tsc-leishmaniosis/repository/archive.zip?ref=master
