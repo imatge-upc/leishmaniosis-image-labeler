@@ -1,12 +1,22 @@
 # TSC Labeling App User documentation
 
-<!-- TO-DO Breu explicació del que fa l'aplicatiu-->
+This program is made for labeling regions of an image. The image can be of any
+type, as long as it is formatted in any of the formats
+listed [below](#file-types).
+
+The regions can take any of these four regions: **[Rectangle](#rectangle)**,
+**[Ellipse](#ellipse)**, **[Polygon](#polygon)** or **[Freehand](#freehand)**.
+They are explained in detail in [Available region types](#available-region-types).
+
+Each region can belong to one of the many available labels (which will be
+configurable by the user in a future version), and contain a comment. All of
+this is detailedly explained in [Label selection](#label-selection)
 
 <!-- This app has been developed for the project **NOM_PROJECTE** from the Image
 Processing Group ([GPI]) at the Signal Theory and Communications
 Department ([TSC]) of Universitat Politècnica de Catalunya - BarcelonaTech
 ([UPC]). It has been funded by the UPC's Centre for Development
-Cooperation ([CCD]). -->
+Cooperation ([CCD]), as a part of its [UPC project on neglected diseases][neglected-diseases]. -->
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -55,6 +65,7 @@ The app's main menu looks like this:
 
 ![Main Menu](screenshots/main_menu.svg)
 
+<a name="file-types"></a>
 The **Browse** button lets the user choose an image file. The supported
 extensions and formats are:
 
@@ -257,6 +268,7 @@ with [Harp][harp].
 [TSC]: http://www.tsc.upc.edu/en
 [UPC]: http://www.upc.edu/?set_language=en
 [CCD]: https://www.upc.edu/ccd/en
+[neglected-diseases]: http://www.upc.edu/ccd/ca/accions-al-sud/projectes-2016/coordinacio-del-treball-de-la-upc-contra-les-malalties-desateses
 [GitLab Pages]: https://pages.gitlab.io/
 [harp]: http://harpjs.com/
 [projrepo]: https://gitlab.com/albertaparicio/tsc-leishmaniosis/
