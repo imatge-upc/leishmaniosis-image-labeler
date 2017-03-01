@@ -356,7 +356,8 @@ end
 api = iptgetapi(regions{l, 1});
 api.setPositionConstraintFcn(fcn);
 
-api.setColor('green');
+% Set colour according to parasite type
+setRegionColour(api, region.parasite_type)
 
 
 % --- Executes on button press in set_square.
