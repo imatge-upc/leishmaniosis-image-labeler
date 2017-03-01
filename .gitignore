@@ -1,5 +1,5 @@
 # Ignore labels JSON files
-*_labels.json
+/data/*.json
 ideas.yaml
 /test_scripts/
 test.m
