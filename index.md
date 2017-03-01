@@ -124,8 +124,9 @@ Rectangular regions are selected by dragging the mouse pointer. They can be
 resized by dragging any of its sides or corners.
 
 Its aspect ratio can be locked by right-clicking the rectangle and selecting the
-**Fix aspect ratio** option. When the aspect ratio is locked, a rectangle can
-only be resized by dragging its corners.
+**Fix aspect ratio** option, or by pressing the `Shift` key at the moment of
+resizing. When the aspect ratio is locked, a rectangle can only be resized by
+dragging its corners.
 
 ![region-selection](screenshots/rect_fix_aspect_ratio.png)
 
@@ -136,8 +137,9 @@ Elliptical regions are selected by dragging the mouse pointer. They can be
 resized by dragging any of its sides or corners.
 
 Its aspect ratio can be locked by right-clicking the ellipse and selecting the
-**Fix aspect ratio** option. When the aspect ratio is locked, an ellipse can
-only be resized by dragging its corners.
+**Fix aspect ratio** option, or by pressing the `Shift` key at the moment of
+resizing. When the aspect ratio is locked, an ellipse can only be resized by
+dragging its corners.
 
 ![region-selection](screenshots/ellipse_fix_aspect_ratio.png)
 
