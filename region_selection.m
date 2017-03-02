@@ -72,16 +72,16 @@ config_values = loadjson('config.json');
 parasite_types = config_values.parasite_types;
 parasite_colours = config_values.parasite_colours;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% DEV OPTION - COMMENT WHEN FINISHED!!!!             %
-img_file_path = './data/img/BCN877_72h_x20bf_3.jpg'; %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % DEV OPTION - COMMENT WHEN FINISHED!!!!             %
+% img_file_path = './data/img/BCN877_72h_x20bf_3.jpg'; %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Choose default command line output for region_selection
 handles.output = hObject;
 
 % Set image file path as the window title
-set(hObject, 'Name', [img_file_path, ' - ', username, ' - TSC Leishmaniosis Labeling App']);
+set(hObject, 'Name', [img_file_path, ' - ', username, ' - Labeling App']);
 
 % Save original window size for when restoring the its size
 set(hObject,'Units', 'normalized');
@@ -115,15 +115,15 @@ function figure1_CloseRequestFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % DEV OPTION - UNCOMMENT WHEN FINISHED!!!! %
-% global last_username                       %
-% global username                            %
-% last_username = username;                  %
-%                                            %
-% % Open main menu figure                    %
-% main_menu                                  %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DEV OPTION - UNCOMMENT WHEN FINISHED!!!! %
+global last_username                       %
+global username                            %
+last_username = username;                  %
+                                           %
+% Open main menu figure                    %
+main_menu                                  %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Hint: delete(hObject) closes the figure
 delete(hObject);
@@ -246,7 +246,7 @@ mkdir(path);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DEV - Activate compact when finished!!                  %
-savejson('', labels, 'FileName', img_name, 'Compact', 0); %
+savejson('', labels, 'FileName', img_name, 'Compact', 1); %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 helpdlg(['Labels have been saved in ', img_name],'Save success')
