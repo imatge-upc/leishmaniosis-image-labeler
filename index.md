@@ -1,4 +1,4 @@
-# TSC Labeling App User documentation
+# Labeling App User documentation
 
 This program is made for labeling regions of an image. The image can be of any
 type, as long as it is formatted in any of the formats
