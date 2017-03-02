@@ -58,6 +58,7 @@ global active_region_type
 global region_texts
 global parasite_types
 global parasite_colours
+global username
 
 active_region_type = '';
 
@@ -71,16 +72,16 @@ config_values = loadjson('config.json');
 parasite_types = config_values.parasite_types;
 parasite_colours = config_values.parasite_colours;
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % DEV OPTION - COMMENT WHEN FINISHED!!!!         %
-% img_file_path = './data/BCN877_72h_x20bf_3.jpg'; %
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % DEV OPTION - COMMENT WHEN FINISHED!!!!             %
+% img_file_path = './data/img/BCN877_72h_x20bf_3.jpg'; %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Choose default command line output for region_selection
 handles.output = hObject;
 
 % Set image file path as the window title
-set(hObject, 'Name', [img_file_path, ' - TSC Leishmaniosis Labeling App']);
+set(hObject, 'Name', [img_file_path, ' - ', username, ' - Labeling App']);
 
 % Save original window size for when restoring the its size
 set(hObject,'Units', 'normalized');
@@ -116,6 +117,10 @@ function figure1_CloseRequestFcn(hObject, eventdata, handles)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DEV OPTION - UNCOMMENT WHEN FINISHED!!!! %
+global last_username                       %
+global username                            %
+last_username = username;                  %
+                                           %
 % Open main menu figure                    %
 main_menu                                  %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -211,21 +216,40 @@ function save_labels_Callback(hObject, eventdata, handles)
 
 global labels
 global img_file_path
+global username
 
-% Get image path without extension
-pattern = '.jpg$';
-replacement = '.json';
-img_name = regexprep(img_file_path,pattern,replacement);
+% Divide img_file_path in path, filename and extension
+[path, filename, ~] = fileparts(img_file_path);
+
+% Change image path for labels path
+path = regexprep(path, 'img', ['labels/', username]);
+
+% % Get image path without extension
+% path_pattern = '\/img\/';
+% path_replace = ['/labels/',username,'/'];
+
+% Change image extension for JSON extension
+extension = '.json';
+
+c = clock;
+
+timestamp = [num2str(c(1), '%04.0f'),num2str(c(2:end), '%02.0f')];
+
+% Construct complete filepath
+img_name = [path,'/',filename,'-',timestamp,extension];
+
+% Make user directory
+mkdir(path);
 
 % TODO Try saving in UBJSON format
 % Save labels to JSON file
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DEV - Activate compact when finished!!                  %
-savejson('', labels, 'FileName', img_name, 'Compact', 0); %
+savejson('', labels, 'FileName', img_name, 'Compact', 1); %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-helpdlg('Labels have been saved','Save success')
+helpdlg(['Labels have been saved in ', img_name],'Save success')
 
 
 % --- Executes on button press in load_data.

@@ -22,7 +22,7 @@ function varargout = main_menu(varargin)
 
 % Edit the above text to modify the response to help main_menu
 
-% Last Modified by GUIDE v2.5 19-Feb-2017 15:43:41
+% Last Modified by GUIDE v2.5 02-Mar-2017 11:56:15
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -54,6 +54,7 @@ function main_menu_OpeningFcn(hObject, eventdata, handles, varargin)
 
 % Initialize selected image path
 global img_file_path
+
 img_file_path = '';
 
 % Choose default command line output for main_menu
@@ -170,15 +171,95 @@ function openimage_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 global img_file_path
+global username
 
 % Detect if an image has been selected
 if ~strcmp(img_file_path, '')
-    % Open region_selection applet figure
-    region_selection
-    
-    % Close this figure
-    close(get(hObject, 'Parent'))
+    if numel(username) > 0
+        % Open region_selection applet figure
+        region_selection
+        
+        % Close this figure
+        close(get(hObject, 'Parent'))
+    else
+        warndlg('Please, select a username before clicking the Open Image button', ...
+        'No username selected')
+    end
 else
     warndlg('Please, select an image before clicking the Open Image button', ...
         'No image selected')
 end
+
+
+
+function edit_username_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_username (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_username as text
+%        str2double(get(hObject,'String')) returns contents of edit_username as a double
+global username
+
+username = get(hObject,'String');
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_username_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_username (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+global last_username
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+if numel(last_username) > 0
+    set(hObject,'String', last_username);
+end
+
+function clearEditBox(hObj, event) %#ok<INUSD>
+
+set(hObj, 'String', '', 'Enable', 'on');
+uicontrol(hObj); % This activates the edit box and
+% places the cursor in the box,
+% ready for user input.
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over edit_username.
+function edit_username_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to edit_username (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Toggle the "Enable" state to ON
+
+set(hObject, 'string', '');
+set(hObject, 'Enable', 'On');
+
+% Create UI control
+
+uicontrol(handles.edit_username);
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over img_path.
+function img_path_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to img_path (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Toggle the "Enable" state to ON
+
+set(hObject, 'string', '');
+set(hObject, 'Enable', 'On');
+
+% Create UI control
+
+uicontrol(handles.img_path);
