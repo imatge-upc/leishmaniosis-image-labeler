@@ -75,6 +75,7 @@ parasite_colours = config_values.parasite_colours;
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % % DEV OPTION - COMMENT WHEN FINISHED!!!!             %
 % img_file_path = './data/img/BCN877_72h_x20bf_3.jpg'; %
+% username = 'albert';                                 %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Choose default command line output for region_selection
@@ -187,12 +188,12 @@ try
     
     if get(hObject, 'Value') == 1
         % Hide labels
-        cellfun(@(text) hide_text_callback(text), region_texts);
+        cellfun(@(text) set(text, 'Visible', 'off'), region_texts);
         
         set(hObject, 'String', 'Show labels');
     else
         % Show labels
-        cellfun(@(text) show_text_callback(text), region_texts);
+        cellfun(@(text) set(text, 'Visible', 'on'), region_texts);
         
         set(hObject, 'String', 'Hide labels');
     end
@@ -202,52 +203,13 @@ catch MException
     set(hObject, 'Value', 0);
 end
 
-function hide_text_callback(text)
-text.Visible = 'off';
-
-function show_text_callback(text)
-text.Visible = 'on';
-
 % --- Executes on button press in save_labels.
-function save_labels_Callback(hObject, eventdata, handles)
+function save_labels_Callback(~, ~, ~)
 % hObject    handle to save_labels (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-global labels
-global img_file_path
-global username
-
-% Divide img_file_path in path, filename and extension
-[path, filename, ~] = fileparts(img_file_path);
-
-% Change image path for labels path
-path = regexprep(path, 'img', ['labels/', username]);
-
-% % Get image path without extension
-% path_pattern = '\/img\/';
-% path_replace = ['/labels/',username,'/'];
-
-% Change image extension for JSON extension
-extension = '.json';
-
-c = clock;
-
-timestamp = [num2str(c(1), '%04.0f'),num2str(c(2:end), '%02.0f')];
-
-% Construct complete filepath
-img_name = [path,'/',filename,'-',timestamp,extension];
-
-% Make user directory
-mkdir(path);
-
-% TODO Try saving in UBJSON format
-% Save labels to JSON file
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% DEV - Activate compact when finished!!                  %
-savejson('', labels, 'FileName', img_name, 'Compact', 1); %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+gui_utils.save_labels
 
 helpdlg(['Labels have been saved in ', img_name],'Save success')
 
@@ -258,24 +220,56 @@ function load_data_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 global img_file_path
+global username
 global labels
 
-% Get image path with JSON extension
-pattern = '.jpg$';
-replacement = '.json';
-data_filepath = regexprep(img_file_path,pattern,replacement);
+% Check if there are already loaded labels
+if numel(labels) > 0
+    % There are labels. Ask user what to do
+    save_choice = questdlg('Do you want to save present labels before closing?',...
+        'Save labels?',...
+        'Yes', 'No', 'Cancel', 'Cancel');
+    
+    % Handle response
+    switch save_choice
+        case 'Yes'
+            % Save labels, then clear and load new labels
+            gui_utils.save_labels
+            gui_utils.clear_regions
+            
+        case 'No'
+            % Clear labels, then load new labels
+            gui_utils.clear_regions
+            
+        case 'Cancel'
+            return
+    end
+end
+
+% Divide img_file_path in path, filename and extension
+[path, filename, ~] = fileparts(img_file_path);
+
+% Change image path for labels path
+path = regexprep(path, 'img', ['labels/', username]);
+
+% Get path of labels file (chosen by the user)
+filename = uigetfile(...
+    {'*.json', 'JSON Files'}, ...
+    'Select labels file to load', ...
+    [path,'/',filename]...
+    );
+
+data_filepath = [path,'/',filename];
 
 labels = loadjson(data_filepath);
 
 % Show regions and labels
 cellfun(@(region) load_region(handles, region), labels);
 
-helpdlg('Labels have been loaded','Load success')
+helpdlg('Labels have been loaded','Load successful')
 
 % --- Executes on data load --- %
 function load_region(handles, region)
-global region_texts
-global parasite_types
 global regions
 
 region_data = region.Position;
@@ -289,21 +283,9 @@ switch region.region_type
             handles.image_axes.YLim ...
             );
         regions{l, 1} = imrect(handles.image_axes, region.Position);
-        
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % TODO Move to function
-        region_texts{l,1} = text(region_data(1)+(region_data(3)/2),...
-            region_data(2)+region_data(4),...
-            parasite_types{region.parasite_type},...
-            'HorizontalAlignment', 'center',...
-            'VerticalAlignment', 'top'...
-            );
-        
-        % Callback for updating rectangle info when it is moved
-        addNewPositionCallback(regions{l, 1},...
-            (@(p) rectangleEllipsePositionCallback(p,l,region_texts{l,1})) ...
-            );
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        % Load region
+        gui_utils.load_rectangle_ellipse_text(l, region, region_data)
     case 'ellipse'
         fcn = makeConstrainToRectFcn( ...
             'imellipse', ...
@@ -312,20 +294,8 @@ switch region.region_type
             );
         regions{l, 1} = imellipse(handles.image_axes, region.Position);
         
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % TODO Move to function
-        region_texts{l,1} = text(region_data(1)+(region_data(3)/2),...
-            region_data(2)+region_data(4),...
-            parasite_types{region.parasite_type},...
-            'HorizontalAlignment', 'center',...
-            'VerticalAlignment', 'top'...
-            );
-        
-        % Callback for updating rectangle info when it is moved
-        addNewPositionCallback(regions{l, 1},...
-            (@(p) rectangleEllipsePositionCallback(p,l,region_texts{l,1})) ...
-            );
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % Load region
+        gui_utils.load_rectangle_ellipse_text(l, region, region_data)
     case 'polygon'
         fcn = makeConstrainToRectFcn( ...
             'impoly', ...
@@ -334,23 +304,8 @@ switch region.region_type
             );
         regions{l, 1} = impoly(handles.image_axes, region.Position);
         
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % TODO Move to function
-        max_h = max(region_data(:,1));
-        min_h = min(region_data(:,1));
-        text_v = max(region_data(:,2));
-        
-        region_texts{l,1} = text((min_h+max_h)/2, text_v,...
-            parasite_types{region.parasite_type},...
-            'HorizontalAlignment', 'center',...
-            'VerticalAlignment', 'top'...
-            );
-        
-        % Callback for updating region info when it is moved
-        addNewPositionCallback(regions{l, 1},...
-            (@(p) regionPositionCallback(p,l,region_texts{l,1})) ...
-            );
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % Load region
+        gui_utils.load_polygon_freehand_text(l, region, region_data)
     case 'freehand'
         fcn = makeConstrainToRectFcn( ...
             'imfreehand', ...
@@ -359,23 +314,8 @@ switch region.region_type
             );
         regions{l, 1} = imfreehand(handles.image_axes, region.Position);
         
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % TODO Move to function
-        max_h = max(region_data(:,1));
-        min_h = min(region_data(:,1));
-        text_v = max(region_data(:,2));
-        
-        region_texts{l,1} = text((min_h+max_h)/2, text_v,...
-            parasite_types{region.parasite_type},...
-            'HorizontalAlignment', 'center',...
-            'VerticalAlignment', 'top'...
-            );
-        
-        % Callback for updating region info when it is moved
-        addNewPositionCallback(regions{l, 1},...
-            (@(p) regionPositionCallback(p,l,region_texts{l,1})) ...
-            );
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % Load region
+        gui_utils.load_polygon_freehand_text(l, region, region_data)
     otherwise
         errordlg('Invalid region type')
 end
@@ -421,36 +361,6 @@ colour = parasite_colours{parasite_type};
 
 region_api.setColor(colour);
 
-% --- Executes on when the user moves a rectangle.
-function rectangleEllipsePositionCallback(region_data, l, text)
-
-global labels
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% TODO Move to function
-% Update position of the color rectangle
-text.Position = [region_data(1)+(region_data(3)/2), ...
-    region_data(2)+region_data(4)];
-
-% Update rectangle position in labels cell array
-labels{l}.Position = region_data;
-
-% --- Executes on when the user moves a non-rectangular region.
-function regionPositionCallback(region_data, l, text)
-
-global labels
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% TODO Move to function
-max_h = max(region_data(:,1));
-min_h = min(region_data(:,1));
-text_v = max(region_data(:,2));
-
-text.Position = [(min_h+max_h)/2, text_v];
-
-% Update region position in labels cell array
-labels{l}.Position = region_data;
-
 % --- Executes on button press in rectangle_region.
 function rectangle_region_Callback(hObject, eventdata, handles)
 % hObject    handle to rectangle_region (see GCBO)
@@ -459,18 +369,7 @@ function rectangle_region_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of rectangle_region
 if get(hObject, 'Value') == 0
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Code from Amirhosein Ghenaati                                     %
-    % https://es.mathworks.com/matlabcentral/answers/5259#answer_161442 %
-    import java.awt.Robot                                               %
-    import java.awt.event.*                                             %
-    keys = Robot;                                                       %
-    keys.setAutoDelay(100)                                              %
-    %   [...]                                                           %
-    keys.keyPress(java.awt.event.KeyEvent.VK_ESCAPE )                   %
-    keys.keyRelease(java.awt.event.KeyEvent.VK_ESCAPE )                 %
-    keys.waitForIdle                                                    %
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    gui_utils.emulate_ESC_key
 end
 
 global regions
@@ -484,13 +383,7 @@ fcn = makeConstrainToRectFcn( ...
     handles.image_axes.YLim ...
     );
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Code from Rafael Monteiro at StackOverflow                          %
-% http://stackoverflow.com/a/23415796/7390416                         %
-fields = fieldnames(handles);                                         %
-region_names = fields(~cellfun(@isempty,strfind(fields, '_region'))); %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+region_names = gui_utils.get_region_fields(handles);
 to_disable = region_names(~strcmp(region_names,[active_region_type,'_region']));
 
 for idx = 1:numel(to_disable)
@@ -522,13 +415,7 @@ function ellipse_region_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of elliptical_region
 if get(hObject, 'Value') == 0
-    import java.awt.Robot
-    import java.awt.event.*
-    keys = Robot;
-    keys.setAutoDelay(100)
-    keys.keyPress(java.awt.event.KeyEvent.VK_ESCAPE )
-    keys.keyRelease(java.awt.event.KeyEvent.VK_ESCAPE )
-    keys.waitForIdle
+    gui_utils.emulate_ESC_key
 end
 
 global regions
@@ -542,8 +429,7 @@ fcn = makeConstrainToRectFcn( ...
     handles.image_axes.YLim ...
     );
 
-fields = fieldnames(handles);
-region_names = fields(~cellfun(@isempty,strfind(fields, '_region')));
+region_names = gui_utils.get_region_fields(handles);
 to_disable = region_names(~strcmp(region_names,[active_region_type,'_region']));
 
 for idx = 1:numel(to_disable)
@@ -576,13 +462,7 @@ function polygon_region_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of toggle_polygon
 if get(hObject, 'Value') == 0
-    import java.awt.Robot
-    import java.awt.event.*
-    keys = Robot;
-    keys.setAutoDelay(100)
-    keys.keyPress(java.awt.event.KeyEvent.VK_ESCAPE )
-    keys.keyRelease(java.awt.event.KeyEvent.VK_ESCAPE )
-    keys.waitForIdle
+    gui_utils.emulate_ESC_key
 end
 
 global regions
@@ -596,8 +476,7 @@ fcn = makeConstrainToRectFcn( ...
     handles.image_axes.YLim ...
     );
 
-fields = fieldnames(handles);
-region_names = fields(~cellfun(@isempty,strfind(fields, '_region')));
+region_names = gui_utils.get_region_fields(handles);
 to_disable = region_names(~strcmp(region_names,[active_region_type,'_region']));
 
 for idx = 1:numel(to_disable)
@@ -629,13 +508,7 @@ function freehand_region_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of freehand_region
 if get(hObject, 'Value') == 0
-    import java.awt.Robot
-    import java.awt.event.*
-    keys = Robot;
-    keys.setAutoDelay(100)
-    keys.keyPress(java.awt.event.KeyEvent.VK_ESCAPE )
-    keys.keyRelease(java.awt.event.KeyEvent.VK_ESCAPE )
-    keys.waitForIdle
+    gui_utils.emulate_ESC_key
 end
 
 global regions
@@ -649,8 +522,7 @@ fcn = makeConstrainToRectFcn( ...
     handles.image_axes.YLim ...
     );
 
-fields = fieldnames(handles);
-region_names = fields(~cellfun(@isempty,strfind(fields, '_region')));
+region_names = gui_utils.get_region_fields(handles);
 to_disable = region_names(~strcmp(region_names,[active_region_type,'_region']));
 
 for idx = 1:numel(to_disable)
@@ -677,8 +549,6 @@ function recursiveRegionConfirm(handles, region_type, h, api, l)
 global region_data
 global regions
 global labels
-global parasite_types
-global region_texts
 global did_select_label
 
 w = wait(h);
@@ -697,33 +567,9 @@ if numel(w) > 0
         
         switch region_type
             case {'rectangle', 'ellipse'}
-                region_texts{l,1} = text(region_data(1)+(region_data(3)/2),...
-                    region_data(2)+region_data(4),...
-                    parasite_types{labels{l}.parasite_type},...
-                    'HorizontalAlignment', 'center',...
-                    'VerticalAlignment', 'top'...
-                    );
-                
-                % Callback for updating rectangle info when it is moved
-                addNewPositionCallback(regions{end, 1},...
-                    (@(p) rectangleEllipsePositionCallback(p,l,...
-                    region_texts{l,1})) ...
-                    );
+                gui_utils.load_rectangle_ellipse_text(l, labels{l}, region_data)
             case{'polygon', 'freehand'}
-                max_h = max(region_data(:,1));
-                min_h = min(region_data(:,1));
-                text_v = max(region_data(:,2));
-                
-                region_texts{l,1} = text((min_h+max_h)/2, text_v,...
-                    parasite_types{labels{l}.parasite_type},...
-                    'HorizontalAlignment', 'center',...
-                    'VerticalAlignment', 'top'...
-                    );
-                
-                % Callback for updating region info when it is moved
-                addNewPositionCallback(regions{end, 1},...
-                    (@(p) regionPositionCallback(p,l,region_texts{l,1})) ...
-                    );
+                gui_utils.load_polygon_freehand_text(l, labels{l}, region_data)
             otherwise
                 errordlg('Error: Invalid region type', 'Invalid region type')
         end
