@@ -66,7 +66,7 @@ classdef gui_utils
             
             % Callback for updating rectangle info when it is moved
             addNewPositionCallback(regions{l, 1},...
-                (@(p) rectangleEllipsePositionCallback(p,l,region_texts{l,1})));
+                (@(p) gui_utils.rectangleEllipsePositionCallback(p,l,region_texts{l,1})));
         end
         
         function load_polygon_freehand_text(l, region, region_data)
@@ -99,7 +99,81 @@ classdef gui_utils
             
             % Callback for updating region info when it is moved
             addNewPositionCallback(regions{l, 1},...
-                (@(p) regionPositionCallback(p,l,region_texts{l,1})));
+                (@(p) gui_utils.polygonFreehandPositionCallback(p,l,region_texts{l,1})));
+        end
+        % --- Executes on when the user moves a rectangle.
+        function rectangleEllipsePositionCallback(region_data, l, text)
+            
+            global labels
+            
+            % Update position of the color rectangle
+            text.Position = [region_data(1)+(region_data(3)/2), ...
+                region_data(2)+region_data(4)];
+            
+            % Update rectangle position in labels cell array
+            labels{l}.Position = region_data;
+        end
+        
+        % --- Executes on when the user moves a non-rectangular region.
+        function polygonFreehandPositionCallback(region_data, l, text)
+            
+            global labels
+            
+            max_h = max(region_data(:,1));
+            min_h = min(region_data(:,1));
+            text_v = max(region_data(:,2));
+            
+            text.Position = [(min_h+max_h)/2, text_v];
+            
+            % Update region position in labels cell array
+            labels{l}.Position = region_data;
+        end
+        
+        function save_labels()
+            global labels
+            global img_file_path
+            global username
+            
+            % Divide img_file_path in path, filename and extension
+            [path, filename, ~] = fileparts(img_file_path);
+            
+            % Change image path for labels path
+            path = regexprep(path, 'img', ['labels/', username]);
+            
+            % Change image extension for JSON extension
+            extension = '.json';
+            
+            c = clock;
+            timestamp = [num2str(c(1), '%04.0f'),num2str(c(2:end), '%02.0f')];
+            
+            % Construct complete filepath
+            img_name = [path,'/',filename,'-',timestamp,extension];
+            
+            % Make user directory
+            mkdir(path);
+            
+            % TODO Try saving in UBJSON format
+            % Save labels to JSON file
+            
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % DEV - Activate compact when finished!!                  %
+            savejson('', labels, 'FileName', img_name, 'Compact', 1); %
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        end
+        
+        function clear_regions()
+            global labels
+            global region_texts
+            global regions
+            
+            % Delete regions and texts
+            cellfun(@(region) delete(region), regions);
+            cellfun(@(region_text) delete(region_text), region_texts);
+            
+            % Re-initialize regions and texts
+            labels = cell(0);
+            regions = cell(0);
+            region_texts = cell(0);
         end
     end
 end
