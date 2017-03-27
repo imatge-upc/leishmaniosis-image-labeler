@@ -75,6 +75,7 @@ parasite_colours = config_values.parasite_colours;
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % % DEV OPTION - COMMENT WHEN FINISHED!!!!             %
 % img_file_path = './data/img/BCN877_72h_x20bf_3.jpg'; %
+% username = 'albert';                                 %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Choose default command line output for region_selection
@@ -203,45 +204,12 @@ catch MException
 end
 
 % --- Executes on button press in save_labels.
-function save_labels_Callback(hObject, eventdata, handles)
+function save_labels_Callback(~, ~, ~)
 % hObject    handle to save_labels (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-global labels
-global img_file_path
-global username
-
-% Divide img_file_path in path, filename and extension
-[path, filename, ~] = fileparts(img_file_path);
-
-% Change image path for labels path
-path = regexprep(path, 'img', ['labels/', username]);
-
-% % Get image path without extension
-% path_pattern = '\/img\/';
-% path_replace = ['/labels/',username,'/'];
-
-% Change image extension for JSON extension
-extension = '.json';
-
-c = clock;
-
-timestamp = [num2str(c(1), '%04.0f'),num2str(c(2:end), '%02.0f')];
-
-% Construct complete filepath
-img_name = [path,'/',filename,'-',timestamp,extension];
-
-% Make user directory
-mkdir(path);
-
-% TODO Try saving in UBJSON format
-% Save labels to JSON file
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% DEV - Activate compact when finished!!                  %
-savejson('', labels, 'FileName', img_name, 'Compact', 1); %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+gui_utils.save_labels
 
 helpdlg(['Labels have been saved in ', img_name],'Save success')
 
@@ -252,19 +220,53 @@ function load_data_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 global img_file_path
+global username
 global labels
 
-% Get image path with JSON extension
-pattern = '.jpg$';
-replacement = '.json';
-data_filepath = regexprep(img_file_path,pattern,replacement);
+% Check if there are already loaded labels
+if numel(labels) > 0
+    % There are labels. Ask user what to do
+    save_choice = questdlg('Do you want to save present labels before closing?',...
+        'Save labels?',...
+        'Yes', 'No', 'Cancel', 'Cancel');
+    
+    % Handle response
+    switch save_choice
+        case 'Yes'
+            % Save labels, then clear and load new labels
+            gui_utils.save_labels
+            gui_utils.clear_regions
+            
+        case 'No'
+            % Clear labels, then load new labels
+            gui_utils.clear_regions
+            
+        case 'Cancel'
+            return
+    end
+end
+
+% Divide img_file_path in path, filename and extension
+[path, filename, ~] = fileparts(img_file_path);
+
+% Change image path for labels path
+path = regexprep(path, 'img', ['labels/', username]);
+
+% Get path of labels file (chosen by the user)
+filename = uigetfile(...
+    {'*.json', 'JSON Files'}, ...
+    'Select labels file to load', ...
+    [path,'/',filename]...
+    );
+
+data_filepath = [path,'/',filename];
 
 labels = loadjson(data_filepath);
 
 % Show regions and labels
 cellfun(@(region) load_region(handles, region), labels);
 
-helpdlg('Labels have been loaded','Load success')
+helpdlg('Labels have been loaded','Load successful')
 
 % --- Executes on data load --- %
 function load_region(handles, region)
@@ -358,32 +360,6 @@ global parasite_colours
 colour = parasite_colours{parasite_type};
 
 region_api.setColor(colour);
-
-% --- Executes on when the user moves a rectangle.
-function rectangleEllipsePositionCallback(region_data, l, text)
-
-global labels
-
-% Update position of the color rectangle
-text.Position = [region_data(1)+(region_data(3)/2), ...
-    region_data(2)+region_data(4)];
-
-% Update rectangle position in labels cell array
-labels{l}.Position = region_data;
-
-% --- Executes on when the user moves a non-rectangular region.
-function regionPositionCallback(region_data, l, text)
-
-global labels
-
-max_h = max(region_data(:,1));
-min_h = min(region_data(:,1));
-text_v = max(region_data(:,2));
-
-text.Position = [(min_h+max_h)/2, text_v];
-
-% Update region position in labels cell array
-labels{l}.Position = region_data;
 
 % --- Executes on button press in rectangle_region.
 function rectangle_region_Callback(hObject, eventdata, handles)
