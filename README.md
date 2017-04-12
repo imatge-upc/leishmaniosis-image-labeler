@@ -2,7 +2,7 @@
 
 This program is made for labeling regions of an image.
 
-**Documentation** -> https://albertaparicio.gitlab.io/tsc-image-labeler/
+**Documentation** -> https://upc-leishmaniosis.gitlab.io/tsc-image-labeler/
 
 Currently, the project has no software license. This means, according to the 
 GNU Project, that this work is copyrighted, and no-one has the right to do 
