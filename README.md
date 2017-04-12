@@ -2,7 +2,7 @@
 
 This project consists of detecting the leishmaniosis parasite in microscope images.
 
-**Documentation** -> https://albertaparicio.gitlab.io/tsc-leishmaniosis
+**Documentation** -> https://albertaparicio.gitlab.io/tsc-image-labeler/
 
 Currently, the project has no software license. This means, according to the 
 GNU Project, that this work is copyrighted, and no-one has the right to do 
