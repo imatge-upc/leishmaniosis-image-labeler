@@ -1,6 +1,6 @@
-# TSC Internship. Detection of leishmaniosis in microscope images
+# Image Labeling App
 
-This project consists of detecting the leishmaniosis parasite in microscope images.
+This program is made for labeling regions of an image.
 
 **Documentation** -> https://albertaparicio.gitlab.io/tsc-image-labeler/
 
