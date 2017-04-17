@@ -209,7 +209,7 @@ function save_labels_Callback(~, ~, ~)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-gui_utils.save_labels
+img_name = gui_utils.save_labels
 
 helpdlg(['Labels have been saved in ', img_name],'Save success')
 

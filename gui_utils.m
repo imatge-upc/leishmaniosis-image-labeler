@@ -129,7 +129,7 @@ classdef gui_utils
             labels{l}.Position = region_data;
         end
         
-        function save_labels()
+        function [img_name] = save_labels()
             global labels
             global img_file_path
             global username
