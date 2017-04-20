@@ -22,7 +22,7 @@ function varargout = region_selection(varargin)
 
 % Edit the above text to modify the response to help region_selection
 
-% Last Modified by GUIDE v2.5 20-Feb-2017 10:35:34
+% Last Modified by GUIDE v2.5 19-Apr-2017 16:56:24
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -209,9 +209,9 @@ function save_labels_Callback(~, ~, ~)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-img_name = gui_utils.save_labels
+img_name = gui_utils.save_labels;
 
-helpdlg(['Labels have been saved in ', img_name],'Save success')
+helpdlg(['Regions have been saved in ', img_name],'Save success')
 
 
 % --- Executes on button press in load_data.
@@ -250,7 +250,7 @@ end
 [path, filename, ~] = fileparts(img_file_path);
 
 % Change image path for labels path
-path = regexprep(path, 'img', ['labels/', username]);
+path = regexprep(path, 'img', ['regions/', username]);
 
 % Get path of labels file (chosen by the user)
 filename = uigetfile(...
@@ -283,7 +283,7 @@ switch region.region_type
             handles.image_axes.YLim ...
             );
         regions{l, 1} = imrect(handles.image_axes, region.Position);
-
+        
         % Load region
         gui_utils.load_rectangle_ellipse_text(l, region, region_data)
     case 'ellipse'
@@ -583,3 +583,53 @@ else
     % Delete the region because it is not wanted by the user
     regions = regions(1:end-1);
 end
+
+
+% --- Executes on selection change in savemaskpopup.
+function savemaskpopup_Callback(hObject, ~, ~)
+% hObject    handle to savemaskpopup (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns savemaskpopup contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from savemaskpopup
+
+contents = cellstr(get(hObject,'String'));
+cont = contents{get(hObject,'Value')};
+
+if ~strcmp(cont, 'Save mask')
+    selected_parasite = str2double(cont(1));
+    
+    [ mask_matrix ] = gui_utils.create_labels(selected_parasite);
+    
+    if ~isequal(size(mask_matrix), [1 1])        
+        labels_path = gui_utils.construct_save_path(...
+            [num2str(selected_parasite),'.png'],'labels');
+        
+        % TODO Afegir tipus de paràsit
+        
+        imwrite(mask_matrix, labels_path)
+        
+        helpdlg(['Labels have been saved in ', labels_path],'Save success')
+    end
+end
+
+% --- Executes during object creation, after setting all properties.
+function savemaskpopup_CreateFcn(hObject, ~, ~)
+% hObject    handle to savemaskpopup (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+global parasite_types
+
+s = get(hObject, 'String');
+
+% TODO Fix this shieet REEEEEEEEEEEE!!!!
+
+set(hObject, 'String', [s, parasite_types]);
