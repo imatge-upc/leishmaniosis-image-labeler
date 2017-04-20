@@ -129,8 +129,21 @@ classdef gui_utils
             labels{l}.Position = region_data;
         end
         
-        function save_labels()
+        function [img_name] = save_labels()
             global labels
+            
+            img_name = gui_utils.construct_save_path('json','regions');
+            
+            % TODO Try saving in UBJSON format
+            % Save labels to JSON file
+            
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % DEV - Activate compact when finished!!                  %
+            savejson('', labels, 'FileName', img_name, 'Compact', 1); %
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        end
+        
+        function [img_name] = construct_save_path(extension, dir)
             global img_file_path
             global username
             
@@ -138,10 +151,10 @@ classdef gui_utils
             [path, filename, ~] = fileparts(img_file_path);
             
             % Change image path for labels path
-            path = regexprep(path, 'img', ['labels/', username]);
+            path = regexprep(path, 'img', [dir,'/', username]);
             
             % Change image extension for JSON extension
-            extension = '.json';
+            extension = ['.',extension];
             
             c = clock;
             timestamp = [num2str(c(1), '%04.0f'),num2str(c(2:end), '%02.0f')];
@@ -151,14 +164,6 @@ classdef gui_utils
             
             % Make user directory
             mkdir(path);
-            
-            % TODO Try saving in UBJSON format
-            % Save labels to JSON file
-            
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            % DEV - Activate compact when finished!!                  %
-            savejson('', labels, 'FileName', img_name, 'Compact', 1); %
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         end
         
         function clear_regions()
@@ -174,6 +179,49 @@ classdef gui_utils
             labels = cell(0);
             regions = cell(0);
             region_texts = cell(0);
+        end
+        
+        function [ mask_matrix ] = create_labels(region_type)
+            %UNTITLED Summary of this function goes here
+            %   Detailed explanation goes here
+            global regions
+            global labels
+            
+            try
+                assert (numel(regions) > 0 && numel(labels) > 0,'MATLAB:NoRegions','There are no regions selected')
+            catch MException
+                helpdlg(MException.message,MException.identifier)
+            end
+            
+            % Get type of each region
+            lab_to_mat = cell2mat(labels);
+            reg_to_filt = [lab_to_mat.parasite_type] == region_type;
+            
+            % Filter regions by desired type
+            filtered = regions(reg_to_filt);
+            
+            try
+                assert(numel(filtered) > 0, 'MATLAB:NoRegions:Type','There are no regions of the selected type')
+            catch MException
+                helpdlg(MException.message,MException.identifier)
+            end
+            
+            % Initialize masks from regions
+            masks = cellfun(@(h) createMask(h), filtered,'UniformOutput',false);
+            
+            % Merge masks
+            mask_mat = cell2mat(cellfun(@(mask) ...
+                reshape(mask,[1,size(mask,1),size(mask,2)]),masks,...
+                'UniformOutput',false));
+            
+            if size(mask_mat,1) == 1
+                merged = mask_mat;
+            else
+                merged = any(mask_mat);
+            end
+            
+            % Return merged mask
+            mask_matrix = reshape(merged,size(merged,2),size(merged,3));
         end
     end
 end
