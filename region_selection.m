@@ -59,6 +59,7 @@ global region_texts
 global parasite_types
 global parasite_colours
 global username
+global image_size
 
 active_region_type = '';
 
@@ -90,6 +91,8 @@ handles.original_size = get(hObject, 'outerposition');
 
 % Plot the selected image
 myImage = imread(img_file_path);
+s = size(myImage);
+image_size = s(1:2);
 axes(handles.image_axes);
 imshow(myImage);
 
@@ -253,10 +256,10 @@ end
 path = regexprep(path, 'img', ['regions/', username]);
 
 % Get path of labels file (chosen by the user)
-filename = uigetfile(...
+[filename, path] = uigetfile(...
     {'*.json', 'JSON Files'}, ...
     'Select labels file to load', ...
-    [path,'/',filename]...
+    [path,'/',[filename,'.json']]...
     );
 
 data_filepath = [path,'/',filename];

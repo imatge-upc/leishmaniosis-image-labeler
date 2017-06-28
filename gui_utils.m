@@ -134,16 +134,20 @@ classdef gui_utils
             
             img_name = gui_utils.construct_save_path('json','regions');
             
+            [filename, pathname, ~] = uiputfile({'*.json',...
+                'JSON Files'; '*.*','All Files' },'Save regions to file',...
+                img_name);
+            
             % TODO Try saving in UBJSON format
             % Save labels to JSON file
-            
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % DEV - Activate compact when finished!!                  %
-            savejson('', labels, 'FileName', img_name, 'Compact', 1); %
+            savejson('', labels, 'FileName', [pathname, filename],... %
+                'Compact', 1);                                        %
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         end
         
-        function [img_name] = construct_save_path(extension, dir)
+        function [img_name] = construct_save_path(extension, dir, varargin)
             global img_file_path
             global username
             
@@ -151,16 +155,25 @@ classdef gui_utils
             [path, filename, ~] = fileparts(img_file_path);
             
             % Change image path for labels path
-            path = regexprep(path, 'img', [dir,'/', username]);
+            
+            switch dir
+                case {'labels'}
+                    substitute = [dir,'/'];
+                otherwise
+                        substitute = [dir,'/', username];
+            end
+            
+            path = regexprep(path, 'img', substitute);
             
             % Change image extension for JSON extension
             extension = ['.',extension];
             
-            c = clock;
-            timestamp = [num2str(c(1), '%04.0f'),num2str(c(2:end), '%02.0f')];
+            %             c = clock;
+            %             timestamp = [num2str(c(1), '%04.0f'),num2str(c(2:end), '%02.0f')];
             
             % Construct complete filepath
-            img_name = [path,'/',filename,'-',timestamp,extension];
+            %             img_name = [path,'/',filename,'-',timestamp,extension];
+            img_name = [path,'/',filename,extension];
             
             % Make user directory
             mkdir(path);
@@ -186,6 +199,7 @@ classdef gui_utils
             %   Detailed explanation goes here
             global regions
             global labels
+            global image_size
             
             try
                 assert (numel(regions) > 0 && numel(labels) > 0,'MATLAB:NoRegions','There are no regions selected')
@@ -200,12 +214,15 @@ classdef gui_utils
             % Filter regions by desired type
             filtered = regions(reg_to_filt);
             
-            try
-                assert(numel(filtered) > 0, 'MATLAB:NoRegions:Type','There are no regions of the selected type')
-            catch MException
-                helpdlg(MException.message,MException.identifier)
-            end
-            
+            % TODO See if this commented part makes the program output a
+            % black picture when there are no regions of the selected type
+%             try
+%                 assert(numel(filtered) > 0, 'MATLAB:NoRegions:Type','There are no regions of the selected type')
+%             catch MException
+%                 helpdlg(MException.message,MException.identifier)
+%             end
+            if numel(filtered) > 0
+
             % Initialize masks from regions
             masks = cellfun(@(h) createMask(h), filtered,'UniformOutput',false);
             
@@ -222,6 +239,11 @@ classdef gui_utils
             
             % Return merged mask
             mask_matrix = reshape(merged,size(merged,2),size(merged,3));
+            
+            else
+                mask_matrix = zeros(image_size);
+                
+            end
         end
     end
 end
