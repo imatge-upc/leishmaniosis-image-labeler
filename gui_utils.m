@@ -66,7 +66,8 @@ classdef gui_utils
             
             % Callback for updating rectangle info when it is moved
             addNewPositionCallback(regions{l, 1},...
-                (@(p) gui_utils.rectangleEllipsePositionCallback(p,l,region_texts{l,1})));
+                (@(p) gui_utils.rectangleEllipsePositionCallback(p,l,...
+                region_texts{l,1})));
         end
         
         function load_polygon_freehand_text(l, region, region_data)
@@ -99,7 +100,8 @@ classdef gui_utils
             
             % Callback for updating region info when it is moved
             addNewPositionCallback(regions{l, 1},...
-                (@(p) gui_utils.polygonFreehandPositionCallback(p,l,region_texts{l,1})));
+                (@(p) gui_utils.polygonFreehandPositionCallback(p,l,...
+                region_texts{l,1})));
         end
         % --- Executes on when the user moves a rectangle.
         function rectangleEllipsePositionCallback(region_data, l, text)
@@ -134,16 +136,20 @@ classdef gui_utils
             
             img_name = gui_utils.construct_save_path('json','regions');
             
+            [filename, pathname, ~] = uiputfile({'*.json',...
+                'JSON Files'; '*.*','All Files' },'Save regions to file',...
+                img_name);
+            
             % TODO Try saving in UBJSON format
             % Save labels to JSON file
-            
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % DEV - Activate compact when finished!!                  %
-            savejson('', labels, 'FileName', img_name, 'Compact', 1); %
+            savejson('', labels, 'FileName', [pathname, filename],... %
+                'Compact', 1);                                        %
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         end
         
-        function [img_name] = construct_save_path(extension, dir)
+        function [img_name] = construct_save_path(extension, dir, varargin)
             global img_file_path
             global username
             
@@ -151,16 +157,25 @@ classdef gui_utils
             [path, filename, ~] = fileparts(img_file_path);
             
             % Change image path for labels path
-            path = regexprep(path, 'img', [dir,'/', username]);
+            
+            switch dir
+                case {'labels'}
+                    substitute = [dir,'/'];
+                otherwise
+                    substitute = [dir,'/', username];
+            end
+            
+            path = regexprep(path, 'img', substitute);
             
             % Change image extension for JSON extension
             extension = ['.',extension];
             
-            c = clock;
-            timestamp = [num2str(c(1), '%04.0f'),num2str(c(2:end), '%02.0f')];
+            %             c = clock;
+            %             timestamp = [num2str(c(1), '%04.0f'),num2str(c(2:end), '%02.0f')];
             
             % Construct complete filepath
-            img_name = [path,'/',filename,'-',timestamp,extension];
+            %             img_name = [path,'/',filename,'-',timestamp,extension];
+            img_name = [path,'/',filename,extension];
             
             % Make user directory
             mkdir(path);
@@ -186,9 +201,11 @@ classdef gui_utils
             %   Detailed explanation goes here
             global regions
             global labels
+            global image_size
             
             try
-                assert (numel(regions) > 0 && numel(labels) > 0,'MATLAB:NoRegions','There are no regions selected')
+                assert (numel(regions) > 0 && numel(labels) > 0,...
+                    'MATLAB:NoRegions','There are no regions selected')
             catch MException
                 helpdlg(MException.message,MException.identifier)
             end
@@ -200,28 +217,37 @@ classdef gui_utils
             % Filter regions by desired type
             filtered = regions(reg_to_filt);
             
-            try
-                assert(numel(filtered) > 0, 'MATLAB:NoRegions:Type','There are no regions of the selected type')
-            catch MException
-                helpdlg(MException.message,MException.identifier)
-            end
-            
-            % Initialize masks from regions
-            masks = cellfun(@(h) createMask(h), filtered,'UniformOutput',false);
-            
-            % Merge masks
-            mask_mat = cell2mat(cellfun(@(mask) ...
-                reshape(mask,[1,size(mask,1),size(mask,2)]),masks,...
-                'UniformOutput',false));
-            
-            if size(mask_mat,1) == 1
-                merged = mask_mat;
+            % TODO See if this commented part makes the program output a
+            % black picture when there are no regions of the selected type
+            %             try
+            %                 assert(numel(filtered) > 0, 'MATLAB:NoRegions:Type','There are no regions of the selected type')
+            %             catch MException
+            %                 helpdlg(MException.message,MException.identifier)
+            %             end
+            if numel(filtered) > 0
+                
+                % Initialize masks from regions
+                masks = cellfun(@(h) createMask(h), filtered,'UniformOutput',...
+                    false);
+                
+                % Merge masks
+                mask_mat = cell2mat(cellfun(@(mask) ...
+                    reshape(mask,[1,size(mask,1),size(mask,2)]),masks,...
+                    'UniformOutput',false));
+                
+                if size(mask_mat,1) == 1
+                    merged = mask_mat;
+                else
+                    merged = any(mask_mat);
+                end
+                
+                % Return merged mask
+                mask_matrix = reshape(merged,size(merged,2),size(merged,3));
+                
             else
-                merged = any(mask_mat);
+                mask_matrix = zeros(image_size);
+                
             end
-            
-            % Return merged mask
-            mask_matrix = reshape(merged,size(merged,2),size(merged,3));
         end
     end
 end
