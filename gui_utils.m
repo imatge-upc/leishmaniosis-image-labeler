@@ -66,7 +66,8 @@ classdef gui_utils
             
             % Callback for updating rectangle info when it is moved
             addNewPositionCallback(regions{l, 1},...
-                (@(p) gui_utils.rectangleEllipsePositionCallback(p,l,region_texts{l,1})));
+                (@(p) gui_utils.rectangleEllipsePositionCallback(p,l,...
+                region_texts{l,1})));
         end
         
         function load_polygon_freehand_text(l, region, region_data)
@@ -99,7 +100,8 @@ classdef gui_utils
             
             % Callback for updating region info when it is moved
             addNewPositionCallback(regions{l, 1},...
-                (@(p) gui_utils.polygonFreehandPositionCallback(p,l,region_texts{l,1})));
+                (@(p) gui_utils.polygonFreehandPositionCallback(p,l,...
+                region_texts{l,1})));
         end
         % --- Executes on when the user moves a rectangle.
         function rectangleEllipsePositionCallback(region_data, l, text)
@@ -160,7 +162,7 @@ classdef gui_utils
                 case {'labels'}
                     substitute = [dir,'/'];
                 otherwise
-                        substitute = [dir,'/', username];
+                    substitute = [dir,'/', username];
             end
             
             path = regexprep(path, 'img', substitute);
@@ -202,7 +204,8 @@ classdef gui_utils
             global image_size
             
             try
-                assert (numel(regions) > 0 && numel(labels) > 0,'MATLAB:NoRegions','There are no regions selected')
+                assert (numel(regions) > 0 && numel(labels) > 0,...
+                    'MATLAB:NoRegions','There are no regions selected')
             catch MException
                 helpdlg(MException.message,MException.identifier)
             end
@@ -216,30 +219,31 @@ classdef gui_utils
             
             % TODO See if this commented part makes the program output a
             % black picture when there are no regions of the selected type
-%             try
-%                 assert(numel(filtered) > 0, 'MATLAB:NoRegions:Type','There are no regions of the selected type')
-%             catch MException
-%                 helpdlg(MException.message,MException.identifier)
-%             end
+            %             try
+            %                 assert(numel(filtered) > 0, 'MATLAB:NoRegions:Type','There are no regions of the selected type')
+            %             catch MException
+            %                 helpdlg(MException.message,MException.identifier)
+            %             end
             if numel(filtered) > 0
-
-            % Initialize masks from regions
-            masks = cellfun(@(h) createMask(h), filtered,'UniformOutput',false);
-            
-            % Merge masks
-            mask_mat = cell2mat(cellfun(@(mask) ...
-                reshape(mask,[1,size(mask,1),size(mask,2)]),masks,...
-                'UniformOutput',false));
-            
-            if size(mask_mat,1) == 1
-                merged = mask_mat;
-            else
-                merged = any(mask_mat);
-            end
-            
-            % Return merged mask
-            mask_matrix = reshape(merged,size(merged,2),size(merged,3));
-            
+                
+                % Initialize masks from regions
+                masks = cellfun(@(h) createMask(h), filtered,'UniformOutput',...
+                    false);
+                
+                % Merge masks
+                mask_mat = cell2mat(cellfun(@(mask) ...
+                    reshape(mask,[1,size(mask,1),size(mask,2)]),masks,...
+                    'UniformOutput',false));
+                
+                if size(mask_mat,1) == 1
+                    merged = mask_mat;
+                else
+                    merged = any(mask_mat);
+                end
+                
+                % Return merged mask
+                mask_matrix = reshape(merged,size(merged,2),size(merged,3));
+                
             else
                 mask_matrix = zeros(image_size);
                 

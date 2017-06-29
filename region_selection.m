@@ -22,7 +22,7 @@ function varargout = region_selection(varargin)
 
 % Edit the above text to modify the response to help region_selection
 
-% Last Modified by GUIDE v2.5 19-Apr-2017 16:56:24
+% Last Modified by GUIDE v2.5 28-Jun-2017 21:04:25
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -588,51 +588,34 @@ else
 end
 
 
-% --- Executes on selection change in savemaskpopup.
-function savemaskpopup_Callback(hObject, ~, ~)
-% hObject    handle to savemaskpopup (see GCBO)
+% --- Executes on button press in exportregions_button.
+function exportregions_button_Callback(hObject, eventdata, handles)
+% hObject    handle to exportregions_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: contents = cellstr(get(hObject,'String')) returns savemaskpopup contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from savemaskpopup
-
-contents = cellstr(get(hObject,'String'));
-cont = contents{get(hObject,'Value')};
-
-if ~strcmp(cont, 'Save mask')
-    selected_parasite = str2double(cont(1));
-    
-    [ mask_matrix ] = gui_utils.create_labels(selected_parasite);
-    
-    if ~isequal(size(mask_matrix), [1 1])        
-        labels_path = gui_utils.construct_save_path(...
-            [num2str(selected_parasite),'.png'],'labels');
-        
-        % TODO Afegir tipus de paràsit
-        
-        imwrite(mask_matrix, labels_path)
-        
-        helpdlg(['Labels have been saved in ', labels_path],'Save success')
-    end
-end
-
-% --- Executes during object creation, after setting all properties.
-function savemaskpopup_CreateFcn(hObject, ~, ~)
-% hObject    handle to savemaskpopup (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
 global parasite_types
+global image_size
 
-s = get(hObject, 'String');
+% Initialize empty cell array to store the binary masks for each parasite type
+binary_masks = zeros([8, image_size]);
 
-% TODO Fix this shieet REEEEEEEEEEEE!!!!
+% Iterate over all parasite types
+for i=1:size(parasite_types,2)
+    % TODO Figure out what to do with 'Background' regions
+    %   Multiply by zero?
+    
+    % Export each parasite's binary mask
+    % Multiply each mask for its hierarchy value
+    binary_masks(i,:,:) = gui_utils.create_labels(i) * i;
+end
 
-set(hObject, 'String', [s, parasite_types]);
+% Pixel-wise max to obtain result hierarchical labels
+image_labels = max(binary_masks,[],1);
+
+% Save labels to CSV file to be read in Python
+labels_path = gui_utils.construct_save_path('.csv','labels');
+
+csvwrite(labels_path,squeeze(image_labels))
+
+helpdlg(['Labels have been saved in ', labels_path],'Save success')
