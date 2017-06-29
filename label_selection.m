@@ -106,7 +106,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-parasite_types = get(hObject, 'String');
+set(hObject, 'String', parasite_types);
 
 
 % --- Executes on button press in ok_button.

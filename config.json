@@ -1,1 +1,22 @@
-{"parasite_types": ["1 - Amastigot","2 - Promastigot","3 - Adherit","4 - No Paràsit","5 - Nucli Sa","6 - Fons","7 - Àrea no utilitzable"],"parasite_colours": ["cyan","blue","green",[1,0.4392156863,0],"magenta","black","red"]}
+{
+    "parasite_types": [,
+        "0 - Fons",
+        "1 - Àrea no utilitzable",
+        "2 - No Paràsit",
+        "3 - Citoplasma",
+        "4 - Nucli",
+        "5 - Promastigot",
+        "6 - Adherit",
+        "7 - Amastigot"
+    ],
+    "parasite_colours": [
+        "black",
+        "red",
+        [1,0.4392156863,0],
+        "white",
+        "magenta",
+        "blue",
+        "green",
+        "cyan"
+    ]
+}
