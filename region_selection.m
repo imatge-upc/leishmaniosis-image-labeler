@@ -145,36 +145,6 @@ px_coordinates = floor(coordinates(1,1:2));
 
 uiwait(label_selection)
 
-
-% --- Executes on button press in toggle_size.
-function toggle_size_Callback(hObject, eventdata, handles)
-% hObject    handle to toggle_size (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of toggle_size
-set(get(hObject, 'Parent'),'Units', 'normalized')
-
-if isequal(get(get(hObject, 'Parent'), 'outerposition'), [0 0 1 1])
-    % The window is maximized -> unmaximize
-    set(get(hObject, 'Parent'),'Units', 'normalized', ...
-        'outerposition', handles.original_size);
-    
-    set(handles.image_axes, 'Units', 'normalized', ...
-        'outerposition', [-0.0986   -0.0234    1.1546    1.0061]);
-    
-    set(hObject, 'String', 'Maximize');
-else
-    % The window is not maximize -> maximize
-    set(get(hObject, 'Parent'), 'Units', 'normalized', ...
-        'outerposition',[0 0 1 1]);
-    
-    set(handles.image_axes, 'Units', 'normalized', ...
-        'outerposition', [-0.0986   -0.0234    1.1546    1.0061]);
-    
-    set(hObject, 'String', 'Restore');
-end
-
 % --- Executes on button press in show_hide_labels.
 function show_hide_labels_Callback(hObject, eventdata, handles)
 % hObject    handle to show_hide_labels (see GCBO)
