@@ -58,6 +58,7 @@ global active_region_type
 global region_texts
 global parasite_types
 global parasite_colours
+global color_code
 global username
 global image_size
 
@@ -72,6 +73,7 @@ region_texts = cell(0);
 config_values = loadjson('config.json');
 parasite_types = config_values.parasite_types;
 parasite_colours = config_values.parasite_colours;
+color_code = config_values.color_code;
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % % DEV OPTION - COMMENT WHEN FINISHED!!!!             %
@@ -565,6 +567,7 @@ function exportregions_button_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 global parasite_types
+global color_code
 global image_size
 
 % Initialize empty cell array to store the binary masks for each parasite type
@@ -572,20 +575,30 @@ binary_masks = zeros([8, image_size]);
 
 % Iterate over all parasite types
 for i=1:size(parasite_types,2)
-    % TODO Figure out what to do with 'Background' regions
-    %   Multiply by zero?
-    
-    % Export each parasite's binary mask
     % Multiply each mask for its hierarchy value
-    binary_masks(i,:,:) = gui_utils.create_labels(i) * i;
+    binary_masks(i,:,:) = (gui_utils.create_labels(i) * (i-1));
 end
 
 % Pixel-wise max to obtain result hierarchical labels
-image_labels = max(binary_masks,[],1);
+image_labels = squeeze(max(binary_masks,[],1));
 
-% Save labels to CSV file to be read in Python
-labels_path = gui_utils.construct_save_path('.csv','labels');
+% Save labels to PNG file to be read later in Python
+labels_path = gui_utils.construct_save_path('png','labels');
 
-csvwrite(labels_path,squeeze(image_labels))
+imwrite(uint8(image_labels),labels_path)
 
 helpdlg(['Labels have been saved in ', labels_path],'Save success')
+
+% Make regions image with color code
+region_image = zeros(size(image_labels,1),size(image_labels,2),3);
+for i=1:size(image_labels,1)
+    for j=1:size(image_labels,2)
+        region_image(i,j,:) = color_code(image_labels(i,j) + 1,:);
+    end
+end
+
+regions_path = gui_utils.construct_save_path('png','regions');
+
+imwrite(region_image,regions_path)
+
+helpdlg(['Regions have been saved in ', regions_path],'Save success')
