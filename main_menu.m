@@ -55,6 +55,9 @@ function main_menu_OpeningFcn(hObject, eventdata, handles, varargin)
 % Initialize selected image path
 global img_file_path
 
+% Force encoding to be UTF8 - Nice string formatting for MacOS systems
+feature('DefaultCharacterSet', 'UTF8');
+
 img_file_path = '';
 
 % Choose default command line output for main_menu
