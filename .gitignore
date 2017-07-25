@@ -1,5 +1,4 @@
 # Ignore labels JSON files
-/data/
 ideas.yaml
 /test_scripts/
 test.m
@@ -131,3 +130,4 @@ GitHub.sublime-settings
 # Files that might appear in the root of a volume
 
 # Directories potentially created on remote AFP share
+/data/old/
