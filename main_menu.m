@@ -107,7 +107,7 @@ global img_file_path
     '*.j2c;*.j2k', 'JPEG 2000 (raw codestream) (*.j2c, *.j2k)';
     '*.tif;*.tiff', 'Tagged Image File Format (*.tif, *.tiff)';
     '*.fts;*.fits', 'Flexible Image Transport System (*.fts, *.fits)'}, ...
-    'Select an image to label');
+    'Select an image to label', 'data/img');
 
 % Discern between whether the user has chosen an image or not
 if strcmp(num2str(filename), '0') && strcmp(num2str(pathname), '0')
